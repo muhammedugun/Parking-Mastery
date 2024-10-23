@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class CarControl : MonoBehaviour
@@ -103,6 +104,11 @@ public class CarControl : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision other)
+    {
+        ObstacleContactControl(other.transform);
+    }
+
     private void InputControl()
     {
         vInput = Input.GetAxis("Vertical");
@@ -148,6 +154,33 @@ public class CarControl : MonoBehaviour
     private void CalculateCurrentSteerRange()
     {
         currentSteerRange = Mathf.Lerp(steeringRange, steeringRangeAtMaxSpeed, speedFactor);
+    }
+
+    private void ObstacleContactControl(Transform objectTransform)
+    {
+        if (objectTransform.CompareTag("Obstacle"))
+        {
+            var objectRenderers = objectTransform.GetComponentsInChildren<MeshRenderer>();
+            foreach (var renderer in objectRenderers)
+            {
+                StartCoroutine(HighlightObstacle(renderer, renderer.material.color));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Highlight işlemini gerçekleştiren coroutine
+    /// </summary>
+    private IEnumerator HighlightObstacle(MeshRenderer meshRenderer, Color defaultColor, int repeatCount = 3, float highlightDuration = 0.5f)
+    {
+        for (int i = 0; i < repeatCount; i++)
+        {
+            meshRenderer.material.color = Color.red;
+            yield return new WaitForSeconds(highlightDuration);
+
+            meshRenderer.material.color = defaultColor;
+            yield return new WaitForSeconds(highlightDuration);
+        }
     }
 
 }
