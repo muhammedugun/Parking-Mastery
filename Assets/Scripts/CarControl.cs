@@ -160,6 +160,7 @@ public class CarControl : MonoBehaviour
     {
         if (objectTransform.CompareTag("Obstacle"))
         {
+            EventBus.Publish(EventType.CarContactObstacle);
             var objectRenderers = objectTransform.GetComponentsInChildren<MeshRenderer>();
             foreach (var renderer in objectRenderers)
             {

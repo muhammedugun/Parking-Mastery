@@ -5,11 +5,11 @@ public class InLevelUI : MonoBehaviour
 {
     [SerializeField] private Image _waitingCircle;
 
-    private ParkingPoint _parkingPoint;
+    private ParkingArea _parkingPoint;
 
     private void Start()
     {
-        _parkingPoint = FindFirstObjectByType<ParkingPoint>();
+        _parkingPoint = FindFirstObjectByType<ParkingArea>();
     }
 
     void Update()
