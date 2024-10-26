@@ -89,6 +89,56 @@ MonoBehaviour:
       score: 50
       photo: https://justplaygames.ru/public/icon_player.png
       uniqueID: 321
+    - rank: 7
+      name: Player7
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 8
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 9
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 10
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 11
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 12
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 13
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 14
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 15
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 16
+      name: Player8
+      score: 50
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
     thisPlayer:
       rank: 2
       score: 10
@@ -175,6 +225,41 @@ MonoBehaviour:
       photo: https://justplaygames.ru/public/icon_player.png
       uniqueID: 000
     - rank: 2
+      name: Player6
+      score: 340000
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 7
+      name: Player6
+      score: 340000
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 8
+      name: Player6
+      score: 340000
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 9
+      name: Player6
+      score: 340000
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 10
+      name: Player6
+      score: 340000
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 11
+      name: Player6
+      score: 340000
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 12
+      name: Player6
+      score: 340000
+      photo: https://justplaygames.ru/public/icon_player.png
+      uniqueID: 321
+    - rank: 13
       name: Player6
       score: 340000
       photo: https://justplaygames.ru/public/icon_player.png

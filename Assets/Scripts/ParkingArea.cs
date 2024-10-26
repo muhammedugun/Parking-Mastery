@@ -40,7 +40,7 @@ public class ParkingArea : MonoBehaviour
                         _arrowDown.gameObject.SetActive(false);
                     ChangeColor(Color.blue);
                     _carStayTime += Time.deltaTime;
-                    if (_carStayTime >= 3f && !_isParkingSuccessful)
+                    if (_carStayTime >= 2f && !_isParkingSuccessful)
                     {
                         _isParkingSuccessful = true;
                         ChangeColor(Color.green);

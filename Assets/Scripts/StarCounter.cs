@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StarCounter : MonoBehaviour
 {
-    [SerializeField] private int _threeStarTime, _twoStarTime;
+    public int _threeStarTime, _twoStarTime;
 
     private void OnEnable()
     {

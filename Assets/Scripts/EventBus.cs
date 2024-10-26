@@ -6,11 +6,9 @@ using UnityEngine.Events;
 public enum EventType
 {
     //Car
-    CarDirectionChanged, CarContactObstacle, CarInsideParkingArea, CarOutsideParkingArea,
+    CarDirectionChanged, CarContactObstacle, CarInsideParkingArea, CarOutsideParkingArea, MuteCarSound, UnMuteCarSound,
     //Other
-    LevelTimeUpdated, StarCountChanged, ParkingSuccessful,
-    // UI
-    AnyPopupOpened, AnyPopupClosed
+    LevelTimeUpdated, StarCountChanged, ParkingSuccessful
 
 }
 
