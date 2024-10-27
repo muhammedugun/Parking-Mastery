@@ -31,6 +31,7 @@ public class GameLoopManager : MonoBehaviour
     {
         _levelPopupManager.CloseAllPopupLevel();
         ResumeGame();
+        EventBus.Publish(EventType.ResumeGame);
     }
 
     public static void RestartLevel()

@@ -8,7 +8,8 @@ public enum EventType
     //Car
     CarDirectionChanged, CarContactObstacle, CarInsideParkingArea, CarOutsideParkingArea, MuteCarSound, UnMuteCarSound,
     //Other
-    LevelTimeUpdated, StarCountChanged, ParkingSuccessful
+    LevelTimeUpdated, StarCountChanged, ParkingSuccessful,
+    ResumeGame
 
 }
 

@@ -583,6 +583,12 @@ MonoBehaviour:
   - LanguageCode: tr
     Text: "\xC7arpt\u0131n\u0131z! araban\u0131n \u015Fu anki konumundan devam etmek
       i\xE7in reklam izleyin"
+  - LanguageCode: de
+    Text: Du hast einen Unfall gehabt! Sieh dir die Anzeige an, um vom aktuellen
+      Standort des Autos fortzufahren
+  - LanguageCode: es
+    Text: "\xA1Te has estrellado! Mira el anuncio para continuar desde la ubicaci\xF3n
+      actual del coche"
 --- !u!1 &1306489212977215136
 GameObject:
   m_ObjectHideFlags: 0

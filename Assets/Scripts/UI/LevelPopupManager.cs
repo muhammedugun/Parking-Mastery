@@ -43,7 +43,7 @@ public class LevelPopupManager : MonoBehaviour
         _cameraButton.SetActive(false);
     }
 
-    private void ShowPauseAndCameraButtons(int id)
+    private void ShowPauseAndCameraButtons(int id = 0)
     {
         _pauseButton.SetActive(true);
         _cameraButton.SetActive(true);
@@ -67,6 +67,7 @@ public class LevelPopupManager : MonoBehaviour
 
     public void OpenPausePopup()
     {
+        HidePauseAndCameraButtons();
         EventBus.Publish(EventType.MuteCarSound);
         Invoke(nameof(InvokePause), 0.05f);
     }
@@ -80,6 +81,7 @@ public class LevelPopupManager : MonoBehaviour
 
     public void ClosePausePopup()
     {
+        ShowPauseAndCameraButtons();
         ClosePopup(_pausePopup);
         GameLoopManager.ResumeGame();
         EventBus.Publish(EventType.UnMuteCarSound);

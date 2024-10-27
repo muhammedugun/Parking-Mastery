@@ -29,6 +29,7 @@ public class MusicManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
         EventBus.Subscribe(EventType.ParkingSuccessful, UnPauseMenuMusicInvoke);
         EventBus.Subscribe(EventType.CarContactObstacle, UnPauseMenuMusicInvoke);
+        EventBus.Subscribe(EventType.ResumeGame, UnPauseLevelMusic);
         YandexGame.GetDataEvent += Initialization;
     }
 
@@ -37,6 +38,7 @@ public class MusicManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
         EventBus.Unsubscribe(EventType.ParkingSuccessful, UnPauseMenuMusicInvoke);
         EventBus.Unsubscribe(EventType.CarContactObstacle, UnPauseMenuMusicInvoke);
+        EventBus.Unsubscribe(EventType.ResumeGame, UnPauseLevelMusic);
         YandexGame.GetDataEvent -= Initialization;
     }
 

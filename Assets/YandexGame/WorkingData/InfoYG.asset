@@ -294,13 +294,13 @@ MonoBehaviour:
     tk: 0
     uk: 0
     uz: 0
-    es: 0
+    es: 1
     pt: 0
     ar: 0
     id: 0
     ja: 0
     it: 0
-    de: 0
+    de: 1
     hi: 0
   fonts:
     defaultFont: []
