@@ -30,7 +30,9 @@ public class MusicManager : MonoBehaviour
         EventBus.Subscribe(EventType.ParkingSuccessful, UnPauseMenuMusicInvoke);
         EventBus.Subscribe(EventType.CarContactObstacle, UnPauseMenuMusicInvoke);
         EventBus.Subscribe(EventType.ResumeGame, UnPauseLevelMusic);
-        YandexGame.GetDataEvent += Initialization;
+        YG2.onGetSDKData += Initialization;
+        if (YG2.isSDKEnabled)
+            Initialization();
     }
 
     private void OnDisable()
@@ -39,7 +41,7 @@ public class MusicManager : MonoBehaviour
         EventBus.Unsubscribe(EventType.ParkingSuccessful, UnPauseMenuMusicInvoke);
         EventBus.Unsubscribe(EventType.CarContactObstacle, UnPauseMenuMusicInvoke);
         EventBus.Unsubscribe(EventType.ResumeGame, UnPauseLevelMusic);
-        YandexGame.GetDataEvent -= Initialization;
+        YG2.onGetSDKData -= Initialization;
     }
 
     private void Start()
@@ -56,37 +58,33 @@ public class MusicManager : MonoBehaviour
         if (scene.name == "MainMenu")
             FindAnyObjectByType<MainMenuMusicUI>().musicManager = this;
 
-        if (CheckMute())
-        {
-            MuteMusic();
-        }
-        else
-        {
-            UnMuteMusic();
-        }
+        ApplyMuteState();
 
         MusicControl(scene.buildIndex);
     }
 
+    /// <summary>
+    /// Kayıtlı müzik durumunu sadece ses kaynaklarına uygular. Kayıt (SaveProgress) yapmaz.
+    /// </summary>
+    private void ApplyMuteState()
+    {
+        bool mute = CheckMute();
+        menuAudioSource.mute = mute;
+        levelAudioSource.mute = mute;
+    }
+
     private void Initialization()
     {
-        if (CheckMute())
-        {
-            MuteMusic();
-        }
-        else
-        {
-            UnMuteMusic();
-        }
+        ApplyMuteState();
     }
 
     /// <summary>
-    /// M�zik sesinin kapal� olup olmad���n� kontrol eder.
+    /// Müzik sesinin kapalı olup olmadığını kontrol eder.
     /// </summary>
-    /// <returns>M�zik kapal�ysa true, a��ksa false d�ner.</returns>
+    /// <returns>Müzik kapalıysa true, açıksa false döner.</returns>
     public static bool CheckMute()
     {
-        return YandexGame.savesData.isMusicOn == false;
+        return YG2.saves.isMusicOn == false;
     }
 
     public void Switch()
@@ -98,24 +96,26 @@ public class MusicManager : MonoBehaviour
     }
 
     /// <summary>
-    /// M�zikleri kapal� duruma getirir.
+    /// Müzikleri kapalı duruma getirir.
     /// </summary>
     public void MuteMusic()
     {
-        YandexGame.savesData.isMusicOn = false;
-        YandexGame.SaveProgress();
+        YG2.saves.isMusicOn = false;
+        if (YG2.isSDKEnabled)
+            YG2.SaveProgress();
 
         menuAudioSource.mute = true;
         levelAudioSource.mute = true;
     }
 
     /// <summary>
-    /// M�zikleri a��k duruma getirir.
+    /// Müzikleri açık duruma getirir.
     /// </summary>
     public void UnMuteMusic()
     {
-        YandexGame.savesData.isMusicOn = true;
-        YandexGame.SaveProgress();
+        YG2.saves.isMusicOn = true;
+        if (YG2.isSDKEnabled)
+            YG2.SaveProgress();
 
         menuAudioSource.mute = false;
         levelAudioSource.mute = false;

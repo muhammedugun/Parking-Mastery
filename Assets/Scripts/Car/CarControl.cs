@@ -9,11 +9,35 @@ public class CarControl : MonoBehaviour
 
     [SerializeField] private float motorTorque = 1000;
     [SerializeField] private float brakeTorque = 4000;
-    [SerializeField] private float decelerationTorque = 25;
+    [Header("Gaz bırakma / yavaşlama")]
+    [Tooltip("Ters yöne basılınca uygulanan fren torku (Space ile fren etkilenmez).")]
+    [SerializeField] private float reverseBrakeTorque = 1500;
+    [Tooltip("Gaz bırakılınca düşük hızdaki yavaşlatma torku.")]
+    [SerializeField] private float coastBrakeTorqueMin = 150;
+    [Tooltip("Gaz bırakılınca maksimum hızdaki yavaşlatma torku (motor freni).")]
+    [SerializeField] private float coastBrakeTorqueMax = 400;
+    [Tooltip("Bu hızın (m/s) altında araç durma torkuna doğru yumuşakça geçer.")]
+    [SerializeField] private float stopHoldSpeed = 1.5f;
+    [Tooltip("Araç durmak üzereyken uygulanan tork; sürünmeyi önler.")]
+    [SerializeField] private float stopHoldTorque = 800;
+
+    [Header("Bariyer hakkı")]
+    [Tooltip("Seviye kaybedilmeden önce bariyerlere kaç kez değmeye izin verilir. Bu sayıya ulaşınca seviye kaybedilir.")]
+    [SerializeField, Min(1)] private int maxObstacleHits = 3;
+    [Tooltip("İki sayılan çarpma arasındaki en az süre (sn). Aynı temasın çok kez sayılmasını önler.")]
+    [SerializeField] private float obstacleHitCooldown = 1f;
+
+    private int _obstacleHitCount;
+    private float _lastObstacleHitTime = -10f;
+
+    /// <summary>Kaybetmeden önce kalan bariyer hakkı.</summary>
+    public int RemainingHits => Mathf.Max(0, maxObstacleHits - _obstacleHitCount);
     [SerializeField] private float maxSpeed = 10;
     [SerializeField] private float steeringRange = 30;
     [SerializeField] private float steeringRangeAtMaxSpeed = 10;
     [SerializeField] private float centreOfGravityOffset = -1f;
+
+    public float MaxSpeed => maxSpeed;
 
     private WheelControl[] wheels;
     private Rigidbody rigidBody;
@@ -44,14 +68,14 @@ public class CarControl : MonoBehaviour
     {
         EventBus.Subscribe(EventType.CarContactObstacle, MakeUncontrollable);
         EventBus.Subscribe(EventType.ParkingSuccessful, MakeUncontrollable);
-        YandexGame.RewardVideoEvent += MakeControllable;
+        YG2.onRewardAdv += MakeControllable;
     }
 
     private void OnDisable()
     {
         EventBus.Unsubscribe(EventType.CarContactObstacle, MakeUncontrollable);
         EventBus.Unsubscribe(EventType.ParkingSuccessful, MakeUncontrollable);
-        YandexGame.RewardVideoEvent -= MakeControllable;
+        YG2.onRewardAdv -= MakeControllable;
     }
 
     void FixedUpdate()
@@ -61,7 +85,7 @@ public class CarControl : MonoBehaviour
             InputControl();
 
             // Arabanın ileri yönüne göre mevcut hızı hesapla (geri doğru giderken ederken negatif bir sayı döndürür)
-            forwardSpeed = Vector3.Dot(transform.forward, rigidBody.velocity);
+            forwardSpeed = Vector3.Dot(transform.forward, rigidBody.linearVelocity);
 
             DirectionControl();
 
@@ -110,13 +134,13 @@ public class CarControl : MonoBehaviour
                 {
                     // If the user is trying to go in the opposite direction
                     // apply brakes to all wheels
-                    wheel.WheelCollider.brakeTorque = Mathf.Abs(vInput) * brakeTorque;
+                    wheel.WheelCollider.brakeTorque = Mathf.Abs(vInput) * reverseBrakeTorque;
                     wheel.WheelCollider.motorTorque = 0;
                 }
 
                 else
                 {
-                    wheel.WheelCollider.brakeTorque = decelerationTorque;
+                    wheel.WheelCollider.brakeTorque = CalculateCoastBrakeTorque();
                     wheel.WheelCollider.motorTorque = 0;
                 }
             }
@@ -185,11 +209,36 @@ public class CarControl : MonoBehaviour
         currentSteerRange = Mathf.Lerp(steeringRange, steeringRangeAtMaxSpeed, speedFactor);
     }
 
+    /// <summary>
+    /// Bariyere değmeyi sayar. Son hak da biterse CarContactObstacle olayını yayınlar (kaybetme).
+    /// Aynı temasın birden fazla sayılmasını önlemek için iki çarpma arasında kısa bir bekleme vardır.
+    /// </summary>
+    /// <returns>Çarpma sayıldıysa true.</returns>
+    private bool RegisterObstacleHit()
+    {
+        // Araç zaten kilitliyse (kaybetti ya da park etti) yeni çarpma sayılmaz
+        if (!_isControllable)
+            return false;
+
+        if (Time.time - _lastObstacleHitTime < obstacleHitCooldown)
+            return false;
+
+        _lastObstacleHitTime = Time.time;
+        _obstacleHitCount++;
+
+        if (_obstacleHitCount >= maxObstacleHits)
+            EventBus.Publish(EventType.CarContactObstacle);
+
+        return true;
+    }
+
     private void ObstacleContactControl(Transform objectTransform)
     {
         if (objectTransform.CompareTag("Obstacle"))
         {
-            EventBus.Publish(EventType.CarContactObstacle);
+            // Çarpma sayılmadıysa (bekleme süresi, kontrol kapalı) vurgu da yapma
+            if (!RegisterObstacleHit())
+                return;
             var objectRenderers = objectTransform.GetComponentsInChildren<MeshRenderer>();
             foreach (var renderer in objectRenderers)
             {
@@ -213,13 +262,29 @@ public class CarControl : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Gaz bırakıldığında uygulanacak yavaşlatma torkunu hesaplar.
+    /// Hız arttıkça tork artar (motor freni), çok düşük hızda ise araç yavaşça tamamen durur.
+    /// </summary>
+    private float CalculateCoastBrakeTorque()
+    {
+        float absSpeed = Mathf.Abs(forwardSpeed);
+        float coast = Mathf.Lerp(coastBrakeTorqueMin, coastBrakeTorqueMax, Mathf.Clamp01(absSpeed / maxSpeed));
+
+        // Düşük hızda araç sürünmesin diye durma torkuna doğru yumuşak geçiş yap
+        float stopBlend = 1f - Mathf.Clamp01(absSpeed / stopHoldSpeed);
+        return Mathf.Lerp(coast, stopHoldTorque, stopBlend);
+    }
+
     private void MakeUncontrollable()
     {
         _isControllable = false;
     }
 
-    private void MakeControllable(int id)
+    private void MakeControllable(string id)
     {
+        // Reklam izleyen oyuncuya yeniden tam hak ver
+        _obstacleHitCount = 0;
         _isControllable = true;
     }
 

@@ -13,8 +13,8 @@ public class SwitchImage : MonoBehaviour
 
     private void Start()
     {
-        // YandexGame sınıfından savesData nesnesini alalım.
-        var savesDataInstance = YandexGame.savesData;
+        // YG2 sınıfından savesData nesnesini alalım.
+        var savesDataInstance = YG2.saves;
 
         // savesData nesnesindeki alana string ismine göre ulaşalım.
         FieldInfo fieldInfo = savesDataInstance.GetType().GetField(saveVariableName, BindingFlags.Public | BindingFlags.Instance);

@@ -17,17 +17,17 @@ public class GameLoopManager : MonoBehaviour
 
     private void OnEnable()
     {
-        YandexGame.RewardVideoEvent += ResumeLevel;
+        YG2.onRewardAdv += ResumeLevel;
         EventBus.Subscribe(EventType.ParkingSuccessful, UnlockLevel);
     }
 
     private void OnDisable()
     {
-        YandexGame.RewardVideoEvent -= ResumeLevel;
+        YG2.onRewardAdv -= ResumeLevel;
         EventBus.Unsubscribe(EventType.ParkingSuccessful, UnlockLevel);
     }
 
-    private void ResumeLevel(int id)
+    private void ResumeLevel(string id)
     {
         _levelPopupManager.CloseAllPopupLevel();
         ResumeGame();
@@ -57,7 +57,7 @@ public class GameLoopManager : MonoBehaviour
     private void UnlockLevel()
     {
         int nextLevelNumber = int.Parse(SceneManager.GetActiveScene().name) + 1;
-        YandexGame.savesData.unlockLevels[nextLevelNumber] = true;
+        YG2.saves.UnlockLevel(nextLevelNumber);
 
         int rewardedStarCount;
 
@@ -74,23 +74,23 @@ public class GameLoopManager : MonoBehaviour
             rewardedStarCount = 3;
         }
 
-        if (rewardedStarCount > YandexGame.savesData.levelsStarCount[nextLevelNumber - 1])
+        if (rewardedStarCount > YG2.saves.GetLevelStars(nextLevelNumber - 1))
         {
-            YandexGame.savesData.levelsStarCount[nextLevelNumber - 1] = rewardedStarCount;
-            YandexGame.SaveProgress();
+            YG2.saves.SetLevelStars(nextLevelNumber - 1, rewardedStarCount);
+            YG2.SaveProgress();
 
             int totalStarCount = 0;
 
-            foreach (var starCount in YandexGame.savesData.levelsStarCount)
+            foreach (var starCount in YG2.saves.levelsStarCount)
             {
                 totalStarCount += starCount;
             }
 
-            YandexGame.NewLeaderboardScores("Leaderboard", totalStarCount);
+            YG2.SetLeaderboard("Leaderboard", totalStarCount);
 
         }
 
-        YandexGame.SaveProgress();
+        YG2.SaveProgress();
 
 
 

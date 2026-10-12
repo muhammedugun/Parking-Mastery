@@ -16,7 +16,7 @@ public class InLevelUI : MonoBehaviour
         _carCameraControl = FindFirstObjectByType<CarCameraControl>();
 
 
-        if (YandexGame.EnvironmentData.isMobile)
+        if (YG2.envir.isMobile)
         {
             _mobileCarController.SetActive(true);
         }

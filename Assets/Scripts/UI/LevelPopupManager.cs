@@ -11,13 +11,13 @@ public class LevelPopupManager : MonoBehaviour
     {
         EventBus.Subscribe(EventType.ParkingSuccessful, OpenWinPopupInvoke);
         EventBus.Subscribe(EventType.CarContactObstacle, OpenAskRewardAdPopupInvoke);
-        YandexGame.RewardVideoEvent += ShowPauseAndCameraButtons;
+        YG2.onRewardAdv += ShowPauseAndCameraButtons;
     }
     private void OnDisable()
     {
         EventBus.Unsubscribe(EventType.ParkingSuccessful, OpenWinPopupInvoke);
         EventBus.Unsubscribe(EventType.CarContactObstacle, OpenAskRewardAdPopupInvoke);
-        YandexGame.RewardVideoEvent -= ShowPauseAndCameraButtons;
+        YG2.onRewardAdv -= ShowPauseAndCameraButtons;
     }
 
     public void OpenPopup(GameObject popup)
@@ -43,7 +43,7 @@ public class LevelPopupManager : MonoBehaviour
         _cameraButton.SetActive(false);
     }
 
-    private void ShowPauseAndCameraButtons(int id = 0)
+    private void ShowPauseAndCameraButtons(string id = null)
     {
         _pauseButton.SetActive(true);
         _cameraButton.SetActive(true);
@@ -72,11 +72,10 @@ public class LevelPopupManager : MonoBehaviour
         Invoke(nameof(InvokePause), 0.05f);
     }
 
-    private void InvokePause()
+private void InvokePause()
     {
         OpenPopup(_pausePopup);
         GameLoopManager.PauseGame();
-        YandexGame.FullscreenShow();
     }
 
     public void ClosePausePopup()

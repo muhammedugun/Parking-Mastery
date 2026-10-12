@@ -11,14 +11,14 @@ public class LevelTimeCounter : MonoBehaviour
     {
         EventBus.Subscribe(EventType.ParkingSuccessful, StopCounting);
         EventBus.Subscribe(EventType.CarContactObstacle, StopCounting);
-        YandexGame.RewardVideoEvent += ResumeCounting;
+        YG2.onRewardAdv += ResumeCounting;
     }
 
     private void OnDisable()
     {
         EventBus.Unsubscribe(EventType.ParkingSuccessful, StopCounting);
         EventBus.Unsubscribe(EventType.CarContactObstacle, StopCounting);
-        YandexGame.RewardVideoEvent -= ResumeCounting;
+        YG2.onRewardAdv -= ResumeCounting;
     }
 
     void Start()
@@ -36,7 +36,7 @@ public class LevelTimeCounter : MonoBehaviour
     {
         CancelInvoke();
     }
-    private void ResumeCounting(int id)
+    private void ResumeCounting(string id)
     {
         InvokeRepeating(nameof(UpdateTime), 1f, 1f);
     }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Initialozation : MonoBehaviour
+public class Initialization : MonoBehaviour
 {
     private static bool _isSettingsSet;
     void Start()

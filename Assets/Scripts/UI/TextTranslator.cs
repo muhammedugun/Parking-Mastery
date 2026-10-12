@@ -37,7 +37,7 @@ public class TextTranslator : MonoBehaviour
 
     public string GetText()
     {
-        return _translationDictionary.TryGetValue(YandexGame.lang, out string translatedText)
+        return _translationDictionary.TryGetValue(YG2.lang, out string translatedText)
             ? translatedText
             : _defaultText;
     }

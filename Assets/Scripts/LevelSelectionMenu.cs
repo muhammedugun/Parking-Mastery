@@ -17,9 +17,9 @@ public class LevelSelectionMenu : MonoBehaviour
         foreach (var levelButton in _levelsButtons)
         {
             int levelNumber = int.Parse(levelButton.GetComponentInChildren<Text>().text);
-            if (YandexGame.savesData.unlockLevels[levelNumber])
+            if (YG2.saves.IsLevelUnlocked(levelNumber))
             {
-                int levelStarCount = YandexGame.savesData.levelsStarCount[levelNumber];
+                int levelStarCount = YG2.saves.GetLevelStars(levelNumber);
                 if (levelStarCount > 0)
                 {
                     var levelStarsGroup = Instantiate(_levelStarsGroupPrefab, parent: levelButton.transform);

@@ -1,2 +1,0 @@
-Build path: C:/Users/Acer/Desktop/GameDev/Projects/Builds/ParkingMastery
-Build number: 19
