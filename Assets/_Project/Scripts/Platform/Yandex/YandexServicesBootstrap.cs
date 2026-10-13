@@ -10,7 +10,7 @@ namespace ParkingMastery.Yandex
         private static void Register()
         {
             GameServices.SetDefaultFactories(
-                ads: () => new YandexAdService(),
+                ads: () => new CooldownAdService(new YandexAdService()),
                 saves: () => new LocalBackupSaveService(new YandexSaveService()),
                 leaderboard: () => new YandexLeaderboardService(),
                 localization: () => new YandexLocalizationService(),

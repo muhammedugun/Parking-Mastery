@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace ParkingMastery.Core
 {
+    /// <summary>
+    /// Oyun açılışında bir kez uygulanan genel ayarlar (dikey senkronizasyon kapalı, hedef kare hızı 60).
+    /// </summary>
     public class Initialization : MonoBehaviour
     {
         private static bool _isSettingsSet;

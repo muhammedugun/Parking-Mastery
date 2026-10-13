@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace ParkingMastery.Core
 {
+    /// <summary>Seviye akışı durumları: yükleniyor, oynanıyor, duraklatıldı, kazanıldı, kaybedildi.</summary>
     public enum GameState { Loading, Playing, Paused, Won, Failed }
 
     /// <summary>

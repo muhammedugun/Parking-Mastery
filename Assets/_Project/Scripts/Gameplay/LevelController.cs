@@ -38,6 +38,8 @@ namespace ParkingMastery.Gameplay
 
         private void ResumeLevel(string id)
         {
+            if (id != AdRewardIds.Resume) return;
+
             CloseAllPopupsRequested?.Invoke();
             ResumeGame();
             EventBus.Publish(GameEventType.ResumeGame);

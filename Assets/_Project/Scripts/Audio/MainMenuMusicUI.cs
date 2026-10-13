@@ -4,13 +4,15 @@ using UnityEngine;
 
 namespace ParkingMastery.Audio
 {
+    /// <summary>
+    /// Ana menüdeki müzik aç/kapa düğmesini MusicManager'a bağlar.
+    /// </summary>
     public class MainMenuMusicUI : MonoBehaviour
     {
-        public MusicManager musicManager;
-
         public void Switch()
         {
-            musicManager.Switch();
+            if (MusicManager.Instance != null)
+                MusicManager.Instance.Switch();
         }
     }
 }

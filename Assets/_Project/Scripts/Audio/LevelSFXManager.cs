@@ -5,6 +5,9 @@ using ParkingMastery.Core;
 
 namespace ParkingMastery.Audio
 {
+    /// <summary>
+    /// Seviye içi ses efektlerini (park alanına giriş/çıkış, başarı, kaybetme, engele çarpma) oyun olaylarına abone olarak çalar.
+    /// </summary>
     public class LevelSFXManager : MonoBehaviour
     {
         [SerializeField] private AudioSource _audioSource;
@@ -33,7 +36,7 @@ namespace ParkingMastery.Audio
         private void PlayObstacleHit(ObstacleHitEvent evt)
         {
             if (_obstacleHitClip != null)
-                _audioSource.PlayOneShot(_obstacleHitClip);
+                _audioSource.PlayOneShot(_obstacleHitClip, Mathf.Lerp(0.4f, 1f, evt.Intensity));
         }
 
         private void PlayCarInsideParkingArea()

@@ -3,12 +3,12 @@ using UnityEngine.UI;
 using ParkingMastery.Services;
 using System.Collections.Generic;
 
-/// <summary>
-/// TextTranslator sınıfı, farklı dillerde çevirileri destekler ve kullanıcı diline göre uygun metni gösterir.
-/// </summary>
-
 namespace ParkingMastery.UI
 {
+    /// <summary>
+    /// TextTranslator sınıfı, farklı dillerde çevirileri destekler ve kullanıcı diline göre uygun metni gösterir.
+    /// </summary>
+    [RequireComponent(typeof(Text))]
     public class TextTranslator : MonoBehaviour
     {
         [SerializeField] private string _defaultText;
@@ -26,6 +26,9 @@ namespace ParkingMastery.UI
         {
             _translationDictionary = new Dictionary<string, string>();
 
+            if (_translations == null)
+                return;
+
             foreach (var translation in _translations)
             {
                 _translationDictionary[translation.LanguageCode] = translation.Text;
@@ -34,18 +37,28 @@ namespace ParkingMastery.UI
 
         private void UpdateText()
         {
-            var textComponent = GetComponent<Text>();
+            if (!TryGetComponent(out Text textComponent))
+            {
+                Debug.LogWarning("TextTranslator: aynı nesnede Text bileşeni yok.", this);
+                return;
+            }
+
             textComponent.text = GetText();
         }
 
+        /// <summary>Kullanıcı diline uygun çeviriyi döndürür; çeviri yoksa varsayılan metni verir.</summary>
         public string GetText()
         {
+            if (_translationDictionary == null)
+                InitializeTranslations();
+
             return _translationDictionary.TryGetValue(GameServices.Localization.Language, out string translatedText)
                 ? translatedText
                 : _defaultText;
         }
     }
 
+    /// <summary>Tek bir dil için çeviri: dil kodu ve o dildeki metin.</summary>
     [System.Serializable]
     public class LanguageText
     {

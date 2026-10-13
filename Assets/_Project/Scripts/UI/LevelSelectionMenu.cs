@@ -6,6 +6,9 @@ using ParkingMastery.Services;
 
 namespace ParkingMastery.UI
 {
+    /// <summary>
+    /// Seviye seçim ekranında düğmelere kilit simgesi veya kayıtlı yıldızları yerleştirir.
+    /// </summary>
     public class LevelSelectionMenu : MonoBehaviour
     {
         [SerializeField] private GameObject _levelLockIconPrefab, _levelStarsGroupPrefab;
@@ -15,30 +18,44 @@ namespace ParkingMastery.UI
 
         private void Start()
         {
+            if (_groupLevels == null)
+            {
+                Debug.LogError("LevelSelectionMenu: _groupLevels atanmamış.", this);
+                return;
+            }
+
             _levelsButtons = _groupLevels.GetComponentsInChildren<Button>();
             foreach (var levelButton in _levelsButtons)
             {
-                int levelNumber = int.Parse(levelButton.GetComponentInChildren<Text>().text);
+                var label = levelButton.GetComponentInChildren<Text>();
+                if (label == null || !int.TryParse(label.text, out int levelNumber))
+                {
+                    Debug.LogWarning($"LevelSelectionMenu: '{levelButton.name}' düğmesinde seviye numarası okunamadı.", levelButton);
+                    continue;
+                }
+
                 if (GameServices.Saves.IsLevelUnlocked(levelNumber))
                 {
                     int levelStarCount = GameServices.Saves.GetLevelStars(levelNumber);
-                    if (levelStarCount > 0)
+                    if (levelStarCount > 0 && _levelStarsGroupPrefab != null)
                     {
                         var levelStarsGroup = Instantiate(_levelStarsGroupPrefab, parent: levelButton.transform);
-                        for (int i = 0; i < levelStarCount; i++)
+                        int starSlots = Mathf.Min(levelStarCount, levelStarsGroup.transform.childCount);
+                        for (int i = 0; i < starSlots; i++)
                         {
-                            levelStarsGroup.transform.GetChild(i).GetComponent<Image>().sprite = _starSprite;
+                            if (levelStarsGroup.transform.GetChild(i).TryGetComponent(out Image star))
+                                star.sprite = _starSprite;
                         }
                     }
-
                 }
                 else
                 {
                     levelButton.interactable = false;
-                    levelButton.transform.GetChild(0).gameObject.SetActive(false);
-                    Instantiate(_levelLockIconPrefab, parent: levelButton.transform);
+                    if (levelButton.transform.childCount > 0)
+                        levelButton.transform.GetChild(0).gameObject.SetActive(false);
+                    if (_levelLockIconPrefab != null)
+                        Instantiate(_levelLockIconPrefab, parent: levelButton.transform);
                 }
-
             }
         }
 

@@ -7,17 +7,19 @@ using ParkingMastery.Gameplay;
 
 namespace ParkingMastery.UI
 {
+    /// <summary>
+    /// Seviye içi HUD: park bekleme halkası, mobil joystick'in etkinleştirilmesi, ev/yeniden başlat/kamera düğmeleri.
+    /// </summary>
     public class InLevelUI : MonoBehaviour
     {
         [SerializeField] private Image _waitingCircle;
         [SerializeField] private GameObject _mobileCarController;
 
         [SerializeField] private ParkingZone _parkingZone;
-        private CarCameraControl _carCameraControl;
+        [SerializeField] private CarCameraControl _carCameraControl;
 
         private void Start()
         {
-            _carCameraControl = FindFirstObjectByType<CarCameraControl>();
 
 
             if (GameServices.Platform.IsMobile)
@@ -65,7 +67,8 @@ namespace ParkingMastery.UI
 
         public void SwitchCamera()
         {
-            _carCameraControl.SwitchCamera();
+            if (_carCameraControl != null)
+                _carCameraControl.SwitchCamera();
         }
     }
 }

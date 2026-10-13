@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5524831352224213520}
-  - component: {fileID: 2734710850694161137}
   - component: {fileID: 4480842880339040356}
   - component: {fileID: 5587954243578634070}
   - component: {fileID: 6671051837642798534}
@@ -36,19 +35,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2734710850694161137
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2255565840621108870}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf035bf138d64f1468f7ab5678c4116f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  time: 0
 --- !u!114 &4480842880339040356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81,6 +67,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: dc6614beca09347ec9b258f12d154bdd, type: 3}
   - {fileID: 8300000, guid: 7478151cf36724a7dada558f746c3633, type: 3}
   - {fileID: 8300000, guid: a99ada3784fb7154da6bd9979d56d23a, type: 3}
+  _obstacleHitClip: {fileID: 8300000, guid: a99ada3784fb7154da6bd9979d56d23a, type: 3}
 --- !u!114 &6671051837642798534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,3 +92,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb79188f4914adc48b84e24a18e3127f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _loader: {fileID: 0}
+  _scoring: {fileID: 0}

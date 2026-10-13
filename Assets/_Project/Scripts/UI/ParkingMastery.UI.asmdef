@@ -1,7 +1,7 @@
 {
   "name": "ParkingMastery.UI",
   "rootNamespace": "ParkingMastery.UI",
-  "references": ["ParkingMastery.Services", "ParkingMastery.Car", "ParkingMastery.Core", "ParkingMastery.Gameplay", "UnityEngine.UI"],
+  "references": ["ParkingMastery.Services", "ParkingMastery.Car", "ParkingMastery.Core", "ParkingMastery.Gameplay", "UnityEngine.UI", "Unity.TextMeshPro"],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

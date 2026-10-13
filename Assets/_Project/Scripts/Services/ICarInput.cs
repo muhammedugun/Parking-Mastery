@@ -12,7 +12,7 @@ namespace ParkingMastery.Services
         /// <summary>Direksiyon girişi: -1 (sol) .. 1 (sağ).</summary>
         float Steer { get; }
 
-        /// <summary>Fren basılı mı?</summary>
+        /// <summary>El freni (Space / fren butonu) basılı mı? Arka tekerleklere güçlü fren uygular ve arka tutunmayı düşürür; ayak freni gaz girişinin ters yönüdür.</summary>
         bool Brake { get; }
 
         /// <summary>Araç sıfırlama bu karede istendi mi? (tek kare doğru döner; Update'te okunmalı)</summary>

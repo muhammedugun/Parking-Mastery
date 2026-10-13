@@ -377,6 +377,10 @@ PrefabInstance:
       propertyPath: _parkingZone
       value: 
       objectReference: {fileID: 118226133512592569}
+    - target: {fileID: 4749760539960293898, guid: a2386a5970eba8e45a14324d6e5d782c, type: 3}
+      propertyPath: _carCameraControl
+      value: 
+      objectReference: {fileID: 1888236059}
     - target: {fileID: 6709140655144407147, guid: a2386a5970eba8e45a14324d6e5d782c, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -541,6 +545,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2497780110729435697, guid: ffe3f7a0e96c33047a95a518f31555a1, type: 3}
+      propertyPath: _carControl
+      value: 
+      objectReference: {fileID: 3649168994942425042}
     - target: {fileID: 2497780110729435697, guid: ffe3f7a0e96c33047a95a518f31555a1, type: 3}
       propertyPath: cameraPositions
       value: 
@@ -749,6 +757,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7767402638367189061, guid: 0dd1499ac1fdc2d4cafa9b915f1fc931, type: 3}
   m_PrefabInstance: {fileID: 3649168994942425041}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1888236059 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2497780110729435697, guid: ffe3f7a0e96c33047a95a518f31555a1, type: 3}
+  m_PrefabInstance: {fileID: 933746874}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e770c89b5d28acd4e994b6c131f804f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &118226133512592568
 PrefabInstance:
   m_ObjectHideFlags: 0

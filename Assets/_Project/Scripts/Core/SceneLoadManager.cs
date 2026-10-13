@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace ParkingMastery.Core
 {
+    /// <summary>Sahne geçişlerini yapar: sahne adı sayıysa seviye numarası olarak kaydedip Gameplay sahnesini yükler; yükleme sonrası zaman ölçeğini 1'e döndürür.</summary>
     public class SceneLoadManager : MonoBehaviour
     {
         public const string GameplaySceneName = "Gameplay";
@@ -13,11 +14,13 @@ namespace ParkingMastery.Core
             Load(sceneName);
         }
 
+        /// <summary>LoadScene'in statik sürümü (kod içinden çağrı için).</summary>
         public static void LoadSceneStatic(string sceneName)
         {
             Load(sceneName);
         }
 
+        /// <summary>Aktif sahneyi yeniden yükler; Gameplay'de LevelSession aynı seviyeyi korur.</summary>
         public static void RestartScene()
         {
             // Gameplay sahnesinde aynı sahne yeniden yüklenir; LevelSession aynı seviyeyi korur.

@@ -7,6 +7,7 @@ namespace ParkingMastery.Core
     /// <summary>Dünya teması (5 dünya × 10 level).</summary>
     public enum WorldTheme { CityParking, Harbor, ConstructionSite, WinterRoad, NightCity }
 
+    /// <summary>Aracın başlangıç konumu ve Y ekseni yönü.</summary>
     [Serializable]
     public struct SpawnPoint
     {
@@ -14,6 +15,7 @@ namespace ParkingMastery.Core
         [Tooltip("Y ekseni dönüşü (derece).")] public float yaw;
     }
 
+    /// <summary>Park alanının konumu, yönü, boyutu ve taşma toleransı.</summary>
     [Serializable]
     public struct ParkingTarget
     {
@@ -23,6 +25,7 @@ namespace ParkingMastery.Core
         [Min(0f), Tooltip("Araç kutusunun alan sınırından taşabileceği pay.")] public float fitTolerance;
     }
 
+    /// <summary>Bir engelin prefab'ı ile dünya uzayındaki konumu, açıları ve ölçeği.</summary>
     [Serializable]
     public struct ObstaclePlacement
     {

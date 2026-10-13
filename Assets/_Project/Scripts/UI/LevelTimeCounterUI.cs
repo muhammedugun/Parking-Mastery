@@ -6,6 +6,9 @@ using ParkingMastery.Core;
 
 namespace ParkingMastery.UI
 {
+    /// <summary>
+    /// Geçen süreyi (LevelTimeUpdated olayı) metin olarak gösterir.
+    /// </summary>
     public class LevelTimeCounterUI : MonoBehaviour
     {
         [SerializeField] private Text _timeCounterText;

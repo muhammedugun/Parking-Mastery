@@ -2,12 +2,12 @@
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="SimpleInput.Runtime.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
-  <Project Path="ParkingMastery.Services.csproj" />
   <Project Path="ParkingMastery.UI.csproj" />
-  <Project Path="ParkingMastery.Car.csproj" />
-  <Project Path="ParkingMastery.Editor.csproj" />
+  <Project Path="ParkingMastery.Services.csproj" />
   <Project Path="ParkingMastery.Core.csproj" />
   <Project Path="ParkingMastery.Audio.csproj" />
-  <Project Path="ParkingMastery.Gameplay.csproj" />
   <Project Path="SimpleInput.Editor.csproj" />
+  <Project Path="ParkingMastery.Car.csproj" />
+  <Project Path="ParkingMastery.Editor.csproj" />
+  <Project Path="ParkingMastery.Gameplay.csproj" />
 </Solution>

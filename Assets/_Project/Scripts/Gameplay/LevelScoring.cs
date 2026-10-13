@@ -96,6 +96,6 @@ namespace ParkingMastery.Gameplay
 
         private void StopCounting() { _running = false; }
 
-        private void ResumeCounting(string id) { _running = true; }
+        private void ResumeCounting(string id) { if (id == AdRewardIds.Resume) _running = true; }
     }
 }

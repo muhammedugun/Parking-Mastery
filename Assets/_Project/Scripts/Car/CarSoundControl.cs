@@ -2,14 +2,13 @@ using UnityEngine;
 using ParkingMastery.Services;
 using ParkingMastery.Core;
 
-/// <summary>
-/// Aracın motor sesini hıza göre ayarlar: araç dururken kısık, hızlandıkça daha yüksek ve tiz.
-/// Ses, oyuncunun motor sesi ayarına (ISaveService.IsEngineSoundOn) ve oyun içi sessize alma olaylarına uyar.
-/// Sessize alma için tek giriş noktası MuteCarSound / UnMuteCarSound olaylarıdır.
-/// </summary>
-
 namespace ParkingMastery.Car
 {
+    /// <summary>
+    /// Aracın motor sesini hıza göre ayarlar: araç dururken kısık, hızlandıkça daha yüksek ve tiz.
+    /// Ses, oyuncunun motor sesi ayarına (ISaveService.IsEngineSoundOn) ve oyun içi sessize alma olaylarına uyar.
+    /// Sessize alma için tek giriş noktası MuteCarSound / UnMuteCarSound olaylarıdır.
+    /// </summary>
     public class CarSoundControl : MonoBehaviour
     {
         [SerializeField] private AudioSource _carEngineSound;
@@ -32,8 +31,9 @@ namespace ParkingMastery.Car
 
         private void Awake()
         {
-            _carRigidbody = GetComponent<Rigidbody>();
-            _carControl = GetComponent<CarControl>();
+            // Bu başvurular null kalabilir; Update null durumuna karşı korumalıdır.
+            TryGetComponent(out _carRigidbody);
+            TryGetComponent(out _carControl);
 
             if (_carEngineSound == null)
             {

@@ -5,9 +5,10 @@ using ParkingMastery.Core;
 
 namespace ParkingMastery.Audio
 {
+    /// <summary>Menü ve seviye müziğini yönetir: sahneye göre doğru müziği açar, kayıtlı müzik ayarına uyar; park başarısı/başarısızlığında menü müziğine, oyuna devam edilince seviye müziğine geçer. Tekil örnektir (Instance).</summary>
     public class MusicManager : MonoBehaviour
     {
-        public AudioSource menuAudioSource, levelAudioSource;
+        [SerializeField] private AudioSource menuAudioSource, levelAudioSource;
 
         /// <summary>
         /// Singleton deseni kullanarak MusicManager örneğini alır.
@@ -36,6 +37,7 @@ namespace ParkingMastery.Audio
             EventBus.Subscribe(GameEventType.LevelFailed, UnPauseMenuMusicInvoke);
             EventBus.Subscribe(GameEventType.ResumeGame, UnPauseLevelMusic);
             GameServices.Saves.Loaded += Initialization;
+            GameServices.Audio.SettingsChanged += ApplyMuteState;
             if (GameServices.Saves.IsReady)
                 Initialization();
         }
@@ -47,22 +49,18 @@ namespace ParkingMastery.Audio
             EventBus.Unsubscribe(GameEventType.LevelFailed, UnPauseMenuMusicInvoke);
             EventBus.Unsubscribe(GameEventType.ResumeGame, UnPauseLevelMusic);
             GameServices.Saves.Loaded -= Initialization;
+            GameServices.Audio.SettingsChanged -= ApplyMuteState;
         }
 
         private void Start()
         {
             MusicControl(SceneManager.GetActiveScene().buildIndex);
 
-            if (SceneManager.GetActiveScene().name == "MainMenu")
-                FindAnyObjectByType<MainMenuMusicUI>().musicManager = this;
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             CancelInvoke();
-            if (scene.name == "MainMenu")
-                FindAnyObjectByType<MainMenuMusicUI>().musicManager = this;
-
             ApplyMuteState();
 
             MusicControl(scene.buildIndex);
@@ -74,8 +72,8 @@ namespace ParkingMastery.Audio
         public void ApplyMuteState()
         {
             bool mute = CheckMute();
-            menuAudioSource.mute = mute;
-            levelAudioSource.mute = mute;
+            if (menuAudioSource != null) menuAudioSource.mute = mute;
+            if (levelAudioSource != null) levelAudioSource.mute = mute;
         }
 
         private void Initialization()
@@ -92,6 +90,7 @@ namespace ParkingMastery.Audio
             return !GameServices.Audio.IsMusicOn;
         }
 
+        /// <summary>Müziği açık ↔ kapalı arasında değiştirir.</summary>
         public void Switch()
         {
             if (CheckMute())
@@ -125,22 +124,22 @@ namespace ParkingMastery.Audio
             }
             else
             {
-                menuAudioSource.Pause();
+                if (menuAudioSource != null) menuAudioSource.Pause();
                 Invoke(nameof(UnPauseLevelMusic), 1f);
             }
         }
 
         private void UnPauseMenuMusicInvoke()
         {
-            levelAudioSource.Pause();
+            if (levelAudioSource != null) levelAudioSource.Pause();
             Invoke(nameof(UnPauseMenuMusic), 1f);
         }
 
         private void UnPauseMenuMusic()
         {
 
-            levelAudioSource.Pause();
-            if (!menuAudioSource.isPlaying)
+            if (levelAudioSource != null) levelAudioSource.Pause();
+            if (menuAudioSource != null && !menuAudioSource.isPlaying)
                 menuAudioSource.UnPause();
 
         }
@@ -148,8 +147,8 @@ namespace ParkingMastery.Audio
         private void UnPauseLevelMusic()
         {
 
-            menuAudioSource.Pause();
-            if (!levelAudioSource.isPlaying)
+            if (menuAudioSource != null) menuAudioSource.Pause();
+            if (levelAudioSource != null && !levelAudioSource.isPlaying)
                 levelAudioSource.UnPause();
 
         }

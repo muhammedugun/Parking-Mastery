@@ -2,16 +2,22 @@ using ParkingMastery.Services;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Düğme ikonunu kayıtlı bool ayara göre açık/kapalı sprite'a çevirir.
-/// saveVariableName: "isMusicOn" veya "isEngineSoundOn" (ISaveService üzerinden okunur).
-/// </summary>
-
 namespace ParkingMastery.UI
 {
+    /// <summary>
+    /// Düğme ikonunu kayıtlı bool ayara göre açık/kapalı sprite'a çevirir.
+    /// saveVariableName: "isMusicOn" veya "isEngineSoundOn" (ISaveService üzerinden okunur).
+    /// </summary>
+    [RequireComponent(typeof(Image))]
     public class SwitchImage : MonoBehaviour
     {
-        public Sprite spriteOn, spriteOff;
+        [SerializeField] private Sprite spriteOn, spriteOff;
+
+        /// <summary>Ayar açıkken gösterilen sprite.</summary>
+        public Sprite SpriteOn => spriteOn;
+
+        /// <summary>Ayar kapalıyken gösterilen sprite.</summary>
+        public Sprite SpriteOff => spriteOff;
 
         [SerializeField] string saveVariableName;
 
@@ -29,7 +35,8 @@ namespace ParkingMastery.UI
                     return;
             }
 
-            GetComponent<Image>().sprite = value ? spriteOn : spriteOff;
+            if (TryGetComponent(out Image image))
+                image.sprite = value ? spriteOn : spriteOff;
         }
     }
 }

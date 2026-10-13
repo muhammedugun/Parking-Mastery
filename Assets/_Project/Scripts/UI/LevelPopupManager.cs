@@ -7,30 +7,36 @@ using ParkingMastery.Gameplay;
 
 namespace ParkingMastery.UI
 {
+    /// <summary>Seviye içi popup'ları yönetir: park başarısında kazanma popup'ını, çarpışmada ödüllü reklam sorusunu açar; ödül alınamazsa kaybetme popup'ına geçer ve duraklatma/kamera düğmelerini gizleyip gösterir.</summary>
     public class LevelPopupManager : MonoBehaviour
     {
         [SerializeField] private GameObject _winPopup, _askRewardAdPopup, _pausePopup;
         [SerializeField] private GameObject _pauseButton, _cameraButton;
+        [SerializeField] private GameObject _losePopup;
         private void OnEnable()
         {
             EventBus.Subscribe(GameEventType.ParkingSuccessful, OpenWinPopupInvoke);
             LevelController.CloseAllPopupsRequested += CloseAllPopupLevel;
             EventBus.Subscribe(GameEventType.LevelFailed, OpenAskRewardAdPopupInvoke);
-            GameServices.Ads.RewardGranted += ShowPauseAndCameraButtons;
+            GameServices.Ads.RewardGranted += OnRewardGranted;
+            GameServices.Ads.RewardFailed += OnRewardFailed;
         }
         private void OnDisable()
         {
             EventBus.Unsubscribe(GameEventType.ParkingSuccessful, OpenWinPopupInvoke);
             LevelController.CloseAllPopupsRequested -= CloseAllPopupLevel;
             EventBus.Unsubscribe(GameEventType.LevelFailed, OpenAskRewardAdPopupInvoke);
-            GameServices.Ads.RewardGranted -= ShowPauseAndCameraButtons;
+            GameServices.Ads.RewardGranted -= OnRewardGranted;
+            GameServices.Ads.RewardFailed -= OnRewardFailed;
         }
 
+        /// <summary>Verilen popup'ı açar.</summary>
         public void OpenPopup(GameObject popup)
         {
             popup.SetActive(true);
         }
 
+        /// <summary>Verilen popup'ı kapatır.</summary>
         public void ClosePopup(GameObject popup)
         {
             popup.SetActive(false);
@@ -49,7 +55,21 @@ namespace ParkingMastery.UI
             _cameraButton.SetActive(false);
         }
 
-        private void ShowPauseAndCameraButtons(string id = null)
+        private void OnRewardGranted(string id)
+        {
+            if (id != AdRewardIds.Resume) return;
+            ShowPauseAndCameraButtons();
+        }
+
+        /// <summary>Ödüllü reklam ödülsüz bitti/gösterilemedi: oyuncu takılmasın, ücretsiz seçenekler (Tekrar / Menü) açılsın.</summary>
+        private void OnRewardFailed(string id)
+        {
+            if (id != AdRewardIds.Resume || _losePopup == null || _askRewardAdPopup == null || !_askRewardAdPopup.activeInHierarchy) return;
+            ClosePopup(_askRewardAdPopup);
+            OpenPopup(_losePopup);
+        }
+
+        private void ShowPauseAndCameraButtons()
         {
             _pauseButton.SetActive(true);
             _cameraButton.SetActive(true);

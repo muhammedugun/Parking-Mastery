@@ -5,6 +5,9 @@ using ParkingMastery.Core;
 
 namespace ParkingMastery.UI
 {
+    /// <summary>
+    /// Kalan yıldız sayısını (StarCountChanged olayı) HUD ve kazanma popup'ındaki yıldız görsellerine yansıtır.
+    /// </summary>
     public class StarCounterUI : MonoBehaviour
     {
         [SerializeField] private Image[] _starsImage, _winPopupStarsImage;

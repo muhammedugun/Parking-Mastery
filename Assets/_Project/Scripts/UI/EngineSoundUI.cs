@@ -3,13 +3,12 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using ParkingMastery.Services;
 
-/// <summary>
-/// Motor sesini açıp kapatan buton için kullanılır. Ayar ISaveService.IsEngineSoundOn içinde saklanır.
-/// Script, aynı GameObject'teki Button'a kendi tıklama dinleyicisini ekler; İkon ayar değiştikçe güncellenir.
-/// </summary>
-
 namespace ParkingMastery.UI
 {
+    /// <summary>
+    /// Motor sesini açıp kapatan buton için kullanılır. Ayar ISaveService.IsEngineSoundOn içinde saklanır.
+    /// Script, aynı GameObject'teki Button'a kendi tıklama dinleyicisini ekler; İkon ayar değiştikçe güncellenir.
+    /// </summary>
     [RequireComponent(typeof(Button))]
     public class EngineSoundUI : MonoBehaviour
     {
@@ -21,7 +20,12 @@ namespace ParkingMastery.UI
 
         private void Awake()
         {
-            _button = GetComponent<Button>();
+            if (!TryGetComponent(out _button))
+            {
+                Debug.LogError("EngineSoundUI: Button bulunamadı.", this);
+                enabled = false;
+                return;
+            }
 
             // Buton başka bir butondan kopyalandıysa (ör. müzik butonu) eski kalıcı tıklama olaylarını devre dışı bırak.
             for (int i = 0; i < _button.onClick.GetPersistentEventCount(); i++)
@@ -48,6 +52,7 @@ namespace ParkingMastery.UI
                 _button.onClick.RemoveListener(Switch);
         }
 
+        /// <summary>Motor sesini açıp kapatır ve ikonu günceller.</summary>
         public void Switch()
         {
             GameServices.Audio.ToggleEngineSound();

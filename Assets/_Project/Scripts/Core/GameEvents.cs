@@ -4,7 +4,9 @@ namespace ParkingMastery.Core
     public readonly struct ObstacleHitEvent : IGameEvent
     {
         public readonly int RemainingHits;
-        public ObstacleHitEvent(int remainingHits) { RemainingHits = remainingHits; }
+        /// <summary>Çarpma şiddeti 0..1 (çarpma hızına göre; hafif temas ≥ 0,25). Ses, kamera sarsıntısı ve ekran uyarısı bunu ölçekler.</summary>
+        public readonly float Intensity;
+        public ObstacleHitEvent(int remainingHits, float intensity = 1f) { RemainingHits = remainingHits; Intensity = intensity; }
     }
 
     /// <summary>Oyun durumu değişti (GameStateMachine yayınlar).</summary>
