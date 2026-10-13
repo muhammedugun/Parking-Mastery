@@ -1,0 +1,257 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50ac2e522a3787b47b6801a82fba584d, type: 3}
+  m_Name: Level_15
+  m_EditorClassIdentifier: ParkingMastery.Core::ParkingMastery.Core.LevelData
+  levelId: 15
+  theme: 1
+  targetTimeSeconds: 120
+  threeStarTime: 120
+  twoStarTime: 180
+  timeLimitSeconds: 0
+  maxObstacleHits: 3
+  carSpawn:
+    position: {x: -14.57, y: 0, z: -10.02}
+    yaw: 0
+  parkingTarget:
+    position: {x: -39.03, y: 0.00999999, z: 15.44}
+    yaw: 359.4067
+    size: {x: 2.5, y: 3.5, z: 5}
+    fitTolerance: 0.1
+  groundPrefab: {fileID: 0}
+  obstacles:
+  - prefab: {fileID: 4723734513448391919, guid: e3d1d514935b8c44b9d50eb75b1cccd4, type: 3}
+    position: {x: -18, y: -0.0024809272, z: 4.47}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4723734513448391919, guid: e3d1d514935b8c44b9d50eb75b1cccd4, type: 3}
+    position: {x: -34.68, y: -0.0024809272, z: 7.76}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4723734513448391919, guid: faa377818d21afc4890e8746cd426ccb, type: 3}
+    position: {x: -15.081931, y: 0, z: 0.34711933}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4723734513448391919, guid: faa377818d21afc4890e8746cd426ccb, type: 3}
+    position: {x: -13.332462, y: 0, z: 0.25935364}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4723734513448391919, guid: faa377818d21afc4890e8746cd426ccb, type: 3}
+    position: {x: -17.48, y: 0, z: 7.6}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4723734513448391919, guid: faa377818d21afc4890e8746cd426ccb, type: 3}
+    position: {x: -23.06, y: 0, z: 7.95}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4723734513448391919, guid: faa377818d21afc4890e8746cd426ccb, type: 3}
+    position: {x: -26.8, y: 0, z: 5.96}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4723734513448391919, guid: faa377818d21afc4890e8746cd426ccb, type: 3}
+    position: {x: -30.75, y: 0, z: 8.61}
+    eulerAngles: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -17.9, y: -0.0017700195, z: 0.22}
+    eulerAngles: {x: -0, y: 257.15997, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -17.23, y: -0.0017700195, z: -2.08}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -17.39, y: -0.0017700195, z: -5.09}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -17.58, y: -0.0017700195, z: -8.02}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -11.05, y: -0.0017700195, z: -4}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -11.27, y: -0.0017700195, z: -6.54}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -11.35, y: -0.0017700195, z: -9}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -11.35, y: -0.0017700195, z: -11.03}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -17.79, y: -0.0017700195, z: -10.69}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -17.29, y: -0.0017700195, z: -13.22}
+    eulerAngles: {x: -0, y: 217.72658, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -15.04, y: -0.0017700195, z: -13.99}
+    eulerAngles: {x: -0, y: 179.22821, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -12.26, y: -0.0017700195, z: -13.22}
+    eulerAngles: {x: -0, y: 140.5275, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -19.24, y: -0.0017700195, z: 2.14}
+    eulerAngles: {x: -0, y: 206.58215, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -12.11, y: -0.0017700195, z: 9.28}
+    eulerAngles: {x: -0, y: 199.63571, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -16.02, y: -0.0017700195, z: 10.57}
+    eulerAngles: {x: -0, y: 189.03203, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -14.17, y: -0.0017700195, z: 10.43}
+    eulerAngles: {x: -0, y: 189.03203, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -17.59, y: -0.0017700195, z: 10.37}
+    eulerAngles: {x: -0, y: 177.9279, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -19.71, y: -0.0017700195, z: 10}
+    eulerAngles: {x: -0, y: 184.20427, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -21.96, y: -0.0017700195, z: 9.79}
+    eulerAngles: {x: -0, y: 182.7094, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -21.95, y: -0.0017700195, z: 3.03}
+    eulerAngles: {x: -0, y: 185.20163, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -24.74, y: -0.0017700195, z: 3.4}
+    eulerAngles: {x: -0, y: 185.20163, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -27.46, y: -0.0017700195, z: 3.54}
+    eulerAngles: {x: -0, y: 185.20163, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -30.08, y: -0.0017700195, z: 3.71}
+    eulerAngles: {x: -0, y: 185.20163, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -32.47, y: -0.0017700195, z: 3.89}
+    eulerAngles: {x: -0, y: 185.20163, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -35.29, y: -0.0017700195, z: 4.18}
+    eulerAngles: {x: -0, y: 175.25511, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -37.25, y: -0.0017700195, z: 4.95}
+    eulerAngles: {x: -0, y: 204.56969, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -38.9, y: -0.0017700195, z: 6.6}
+    eulerAngles: {x: -0, y: 235.25072, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -40.26, y: -0.0017700195, z: 8.73}
+    eulerAngles: {x: -0, y: 248.67749, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -40.99, y: -0.0017700195, z: 10.81}
+    eulerAngles: {x: -0, y: 258.22046, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -41.37, y: -0.0017700195, z: 13.16}
+    eulerAngles: {x: -0, y: 272.2579, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -36.57, y: -0.0017700195, z: 15.18}
+    eulerAngles: {x: -0, y: 272.2579, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -41.55, y: -0.0017700195, z: 15.24}
+    eulerAngles: {x: -0, y: 272.2579, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -36.5, y: -0.0017700195, z: 17.29}
+    eulerAngles: {x: -0, y: 272.2579, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -36.65, y: -0.0017700195, z: 18.93}
+    eulerAngles: {x: -0, y: 179.59961, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -38.89, y: -0.0017700195, z: 18.92}
+    eulerAngles: {x: -0, y: 179.59961, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -41.17, y: -0.0017700195, z: 18.87}
+    eulerAngles: {x: -0, y: 179.59961, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -41.36, y: -0.0017700195, z: 17.12}
+    eulerAngles: {x: -0, y: 272.2579, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -24.44, y: -0.0017700195, z: 9.83}
+    eulerAngles: {x: -0, y: 185.20163, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -27.23, y: -0.0017700195, z: 9.78}
+    eulerAngles: {x: -0, y: 175.87047, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -29.77, y: -0.0017700195, z: 10.13}
+    eulerAngles: {x: -0, y: 193.81512, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -32.22, y: -0.0017700195, z: 10.97}
+    eulerAngles: {x: -0, y: 209.37573, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -34.15, y: -0.0017700195, z: 11.71}
+    eulerAngles: {x: -0, y: 209.37573, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -35.95, y: -0.0017700195, z: 13.48}
+    eulerAngles: {x: -0, y: 232.16217, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -10.86, y: -0.0017700195, z: 7.19}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -10.98, y: -0.0017700195, z: 2.91}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 6251666189375065463, guid: d4f40363aa44ea649ac792f348b8c36a, type: 3}
+    position: {x: -10.91, y: -0.0017700195, z: -1.03}
+    eulerAngles: {x: -0, y: 270.00015, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4268639624742136431, guid: d5d94a87bf91ec842aeb8faa43a7ec9a, type: 3}
+    position: {x: -24.8, y: 0, z: 7.23}
+    eulerAngles: {x: -0, y: 326.7583, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  - prefab: {fileID: 4268639624742136431, guid: d5d94a87bf91ec842aeb8faa43a7ec9a, type: 3}
+    position: {x: -28.83, y: 0, z: 7.39}
+    eulerAngles: {x: -0, y: 214.76993, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  music: {fileID: 0}
+  environment: {fileID: 0}

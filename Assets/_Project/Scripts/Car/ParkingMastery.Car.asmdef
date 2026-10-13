@@ -1,0 +1,14 @@
+{
+  "name": "ParkingMastery.Car",
+  "rootNamespace": "ParkingMastery.Car",
+  "references": ["ParkingMastery.Core", "ParkingMastery.Services"],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

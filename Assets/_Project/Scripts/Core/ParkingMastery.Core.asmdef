@@ -1,0 +1,14 @@
+{
+  "name": "ParkingMastery.Core",
+  "rootNamespace": "ParkingMastery.Core",
+  "references": ["UnityEngine.UI", "ParkingMastery.Services"],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

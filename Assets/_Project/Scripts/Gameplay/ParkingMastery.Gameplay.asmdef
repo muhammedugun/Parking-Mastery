@@ -1,0 +1,14 @@
+{
+  "name": "ParkingMastery.Gameplay",
+  "rootNamespace": "ParkingMastery.Gameplay",
+  "references": ["ParkingMastery.Core", "ParkingMastery.Services", "ParkingMastery.Car"],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

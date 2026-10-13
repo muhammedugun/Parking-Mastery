@@ -1,0 +1,403 @@
+# Parking-Mastery — Baştan Profesyonel Yeniden Yapım Planı
+
+> **Nasıl kullanılır (ücretsiz Claude için):**
+> 1. Bu dosyayı proje klasörünün köküne koy (ör. `PARKING_MASTERY_PLAN.md`).
+> 2. Her yeni sohbette şunu yaz: *"Planı oku, ilk işaretlenmemiş `[ ]` adımı yap, bitince `[x]` yap ve özet geç."*
+> 3. **Bir sohbette sadece 1 adım (en fazla 2 küçük adım).** Her adım tek oturumda bitecek boyutta tasarlandı.
+> 4. Her adımın sonunda: Console'da hata yok → sahne kaydedildi → (varsa) git commit.
+> 5. Bir adım yarım kalırsa, adımın altına `> NOT:` satırıyla nerede kaldığını yaz.
+
+Boyut etiketleri: **[S]** küçük (~1 sohbet'in yarısı), **[M]** orta (1 sohbet).
+
+---
+
+## 0. Mevcut Durum (otomatik tespit edildi)
+
+- Sahneler: `MainMenu`, `LevelSelectionMenu`, `Levels/1 … 30` (toplam 32 sahne, hepsi Build Settings'te).
+- Oyun scriptleri (`Assets/Scripts`, 26 adet): `AdManager, LevelSFXManager, MusicManager, SFXManager, CarCameraControl, CarControl, CarSoundControl, WheelControl, EventBus, GameLoopManager, Initialization, LevelSelectionMenu, LevelTimeCounter, ParkingArea, SavesYG, SceneLoadManager, StarCounter, EngineSoundUI, GeneralUIManager, InLevelUI, LevelPopupManager, LevelTimeCounterUI, MainMenuMusicUI, StarCounterUI, SwitchImage, TextTranslator`.
+- Eklentiler: **PluginYourGames** (Yandex SDK — dokunulmayacak, sadece sarmalanacak), **SimpleInput**.
+- Örnek seviye hiyerarşisi (Level 3): `Directional Light, Audio, Managers (5 script bir arada), Canvas_InLevel (8 çocuk; üstünde InLevelUI + LevelTimeCounterUI + StarCounterUI + LevelPopupManager + AudioSource + SFXManager + AdManager!), Ground (tek mesh), Main Camera, EventSystem, ParkingArea, Car, Obstacles (96 düz çocuk)`.
+- Tespit edilen sorunlar:
+  - Her level sahnesinde yönetici/UI kopyası var → 30 yerde aynı şeyi düzeltmek gerekiyor.
+  - Bir Canvas objesi UI + ses + reklam + popup görevlerini birlikte üstlenmiş (God Object).
+  - Obstacles düz liste (grup/prefab yok), Ground tek mesh, **ortam (environment) yok**.
+  - Projede `Assets/Editor/LevelTools/LevelBuilder.cs` var (bugün değişmiş) → ne olduğu incelenecek.
+- Kısıtlar: **Yandex Games (tarayıcı/WebGL)** → küçük build (sınır 100 MB sıkıştırmasız), düşük draw call, mobil+masaüstü, RU/EN/TR yerelleştirme. Ayrıntılı kısıtlar ve ölçek kararları: **Bölüm 0B**.
+
+---
+
+## 0B. Yandex Games Kısıtları ve Ölçek Kararları
+
+> Kaynak: Yandex Games dokümantasyonu (Game requirements, Quick start, Ad placement — gereksinim sayfası "Last updated: 9 Ekim 2026"). Numaralar resmi gereksinim maddeleridir (ör. 1.3, 4.7). Moderasyon 3–5 iş günü sürer; testler gerçek kullanıcı koşullarını simüle eder, kendi cihazında tekrarlanmayan hata da red nedeni olabilir.
+
+### 0B.1 Kitle → tasarım sonuçları
+
+| Yandex verisi | Bizim için sonuç |
+|---|---|
+| Rusya + BDT %60, diğer %40 | RU öncelikli dil, ardından EN/TR; Kiril destekli font şart |
+| Telefon %50, bilgisayar %40, tablet/TV %10 | Mobil öncelikli: dokunmatik kontrol, büyük butonlar, düşük/orta uç Android |
+| Yaş: 35–44 %49, 55+ %20, 0–24 %11 | Casual kitle: sade arayüz, okunaklı büyük yazı, adil/kademeli zorluk |
+| Ortalama platform süresi 55 dk | Kısa levellerden oluşan çok sayıda level uygun (v1: 30, v2: 50 level) |
+| Rating > 30 olmalı (yeni oyunda ~2 hafta sonra oluşur; 3 hafta ≤ 30 kalırsa yayından kalkar) | İlk dakika kritik: hızlı ilk kazanç, hatasız ve akıcı çalışma |
+
+### 0B.2 Zorunlu gereksinimler → plan adımı
+
+| Gereksinim | Ne yapacağız | Adım |
+|---|---|---|
+| 1.1, 1.19 SDK doğru başlatılır; `LoadingAPI.ready()` oynanabilir olduğu an; `GameplayAPI.start/stop`; pause/resume olayları | SDK akışını resmi dokümana göre doğrula | B3, J5 |
+| 1.2 Girişsiz oynanır; giriş yalnız bilinçli butonla, yalnız Yandex ID | Misafir mod + isteğe bağlı giriş butonu | B4, J3, J4 |
+| 1.3, 4.7 Odak kaybında ve reklamda ses/oyun durur | Odak + reklam duraklatma | J2, J6 |
+| 1.6.1 Mobil: tam ekran, uzun basışta menü/seçim yok, WebGL uyarısı yok, tamamen dokunmatik | WebGL şablonu + kontrol şeması | Y3, Y4, C6 |
+| 1.6.2 Masaüstü: alan sığar, uzun kenar ≤ 2× kısa kenar, klavye/fare, klavye düzeninden bağımsız, OS kısayolu yok, sağ tık menüsü yok | WebGL şablonu + girdi | Y4, C6 |
+| 1.9 İlerleme eylemden hemen sonra kaydedilir; yenileme/döndürmede kaybolmaz | Anında kayıt | C4, J4 |
+| 1.10 Yeniden boyutlandırma/döndürmede doğru çizim; sayfa kaydırma / pull-to-refresh yok; **tek elle oynanabilir** | UI ölçekleme + tek-el şeması | Y3, Y4, E9 |
+| 1.12 Monetizasyon açık (reklam veya satın alma) | Reklam | C5, J2 |
+| 1.14, 1.15 Hata/donma/çökme yok, oyun bitmiş görünümde | Tam test turları | K4, K5 |
+| 1.20 Tarayıcı/OS uyumu (Android 5+, iOS 9+, taslakta seçilen ortam) | Unity 6 WebGL2 gerektirir → gerçekçi cihaz tabanını belirle, taslakta yalnız doğrulanan platformları seç, düşük uç cihazda aç-oyna testi | Y2, K4 |
+| 1.7, 1.18 Yandex S3'e mutlak URL yok; oyun açıldığı URL'ye bağlı kısıtlanmaz | Kod/şablon taraması + farklı adreste açılış testi | K7 |
+| 1.21 Toplam dosya ≤ 100 MB (sıkıştırmasız) | Boyut bütçesi (0B.3) | Y2, K1 |
+| 1.22 `index.html` arşiv kökünde; dosya/klasör adlarında boşluk ve Rusça karakter yok | Build paketleme kontrolü | K7 |
+| 1.23 Çalışma anında etkileşimli YZ yasak (önceden üretilmiş içerik serbest) | Uyumlu | — |
+| 2.2 Kontroller oyunda veya taslaktaki How to play alanında anlatılır | Tutorial + taslak metni | E10, K6 |
+| 2.8, 2.9 Zorluk kademeli; ana içerik > 10 dk veya tekrar sebebi | Zorluk eğrisi | H2, H14 |
+| 2.14 Dil `ysdk.environment.i18n.lang` ile otomatik | Merkezi yerelleştirme | E8, J5 |
+| 3.4 Siyaset/savaş/din/büyü/gerçekçi şiddet içeriği yok | İçerik politikası | Y5 |
+| 3.5, 3.6 Tüm materyalin hakkı bizde; katalogdaki oyunları kopyalama | Telif + farklılaşma | Y5, 1.3 |
+| 4.x Reklam kuralları | Bkz. 0B.5 | C5, J2 |
+| 5.x, 8.2.2 Taslak alanları, benzersiz ad (free/top/best yok), gerçek oynanış ekran görüntüleri | Mağaza materyalleri | K6 |
+
+### 0B.3 Ölçek ve bütçe kararları
+
+Ölçülen mevcut durum (2026-10-12) → hedef:
+
+| Kalem | Şu an | Hedef |
+|---|---|---|
+| Aktif platform | StandaloneWindows64 | WebGL |
+| Renk uzayı | Linear | Gamma (G1'de ölçüp teyit) |
+| Kalite seviyeleri | 1 (Medium) | Low / Medium (+ High masaüstü) |
+| Sahne sayısı | 32 (8.4 MB) | 3–4 sahne (Boot, Menu, Gameplay) + LevelData |
+| `Assets/Audio` | ≈ 42.7 MB | ≤ ~8 MB |
+| `Assets/Plugins` | ≈ 12.3 MB | İncele, gereksizi at (Y2) |
+| Assets toplamı | ≈ 75.6 MB | Build ≤ ~40 MB sıkıştırmasız (sınır: 100 MB); Brotli sonrası indirme ≤ ~15 MB |
+| Texture | — | Çoğu 512, en çok 1024; tek palet atlası |
+| Performans | — | Mobil 30 FPS (orta seviye Android), masaüstü 60 FPS; draw call ≤ ~150; level başı ≤ ~100k üçgen; ucuz/gölgesiz mobil ışık |
+| Render | Built-in, Unity 6000.3.25f1 | Built-in korunur (URP'ye geçiş WebGL'de gereksiz risk/boyut) |
+
+> Not: Yandex'in sabit sınırı yalnızca 100 MB'dır; diğer rakamlar mobil tarayıcıda hızlı yükleme için **kendi hedeflerimizdir**.
+
+### 0B.4 Kapsam kararları (v1)
+
+1. **Platform:** Telefon + masaüstü. TV v1 dışı (uzaktan kumanda okları + Back/OK zorunlulukları ek iş). Yönelim taslakta seçilir; öneri: **yatay**. Döndürme/yeniden boyutlandırma testleri zorunlu.
+2. **Para kazanma:** Yalnızca reklam (interstitial + rewarded). Uygulama içi satın alma v1 dışı (sunucu kaydı, tüketim yöntemi, konsol senkronu gibi ek koşullar). Sonraki güncellemede değerlendirilir.
+3. **Giriş:** Misafir olarak tam oyun; Yandex girişi yalnız isteğe bağlı butonla. Liderlik tablosu ikincil.
+4. **Diller:** RU (öncelik), EN, TR; diğer diller EN'ye düşer.
+5. **Araç çeşitliliği:** v1 dışı; tek araba modeli (+ renk).
+6. **Ortam:** 5 tema korunur ama ortak palet/prefab havuzu paylaşılır; tema = renk, ışık, zemin, ses, birkaç özgün prop. G3–G7 buna göre küçültülür.
+7. **Level süresi:** Level < 5 dk (hedef 30–120 sn) → **level içinde reklam yok**; reklam yalnız oyun dışı eylemlerden sonra.
+8. **Mobil kontrol:** Tek el şartı için Y3'te karar verilir.
+9. **İçerik:** Gerçek marka/logo yok; siyaset, din, savaş, askeri araç, şiddet yok.
+10. **Yayın sürümleri:** Önce yayınlanmayan bir WebGL **dikey dilim** (menü + 1 level + SDK + reklam akışı; draft modunda test), sonra **v1 = 30 level, 3 dünya (Şehir Otoparkı, Liman, Şantiye)** yayınlanır; **v2 = Level 31–50 + Kış/Gece ortam kitleri** güncelleme olarak eklenir (güncelleme ana konsepti korur — 1.24). Gerekçe: rating yayından ~2 hafta sonra oluşur ve 3 hafta ≤ 30 kalırsa oyun yayından kalkar; moderasyon 3–5 iş günü sürer; erken yayın gerçek oyuncu verisi verir. Mevcut 30 legacy level (A9) v1'in referansıdır. Engel dağılımı: hız tümseği/rampa/hareketli engeller v1'de; buz/çamur/su ve kural bölgeleri v2'de.
+
+### 0B.5 Reklam kuralları özeti
+
+- **Interstitial:** Yalnız oyun dışı eylemden sonra (Sonraki, Tekrar, Menü, Level seç); eylem ile reklam arası gecikme ≤ 2 sn. Sıklığı platform sınırlar (çok sık çağrı konsol uyarısı verir); ek olarak kendi bekleme aralığımızı koyarız (öneri: ≥ 60–90 sn).
+- **Rewarded:** Oyuncu isteyerek ayrı butona basar; buton/metin reklam izleneceğini ve **somut ödülü** açıkça yazar. Ödül ek bonus olmalı (ek süre, ipucu, level atlama) ve devam edebilmenin şartı olmamalı → **Tekrar dene / sonraki level ücretsiz kalır**.
+- Reklam sırasında oyun ve ses duraklar; reklam sonrası ilerleme kaybolmaz; reklam yönüyle oyun yönü aynıdır.
+- Yandex reklam birimlerinin içeriği/görünümü değiştirilmez; taklit tam ekran reklam veya sahte rewarded butonu yok. Ek birim gerekirse yalnız sticky banner.
+
+### 0B.6 Yandex uyumluluk adımları
+
+- [ ] **Y1 [S]** `docs/YANDEX_CHECKLIST.md`: 0B.2 tablosunu test edilebilir kontrol listesine çevir (her madde için nasıl test edilir); resmi sayfaların güncel hâlini tekrar oku.
+- [ ] **Y2 [S]** WebGL baseline build (A2/A8 ile birlikte): platformu WebGL'e çevir, boş bir build al, boyut/hata kaydet; 42.7 MB ses ve 12.3 MB plugin boyutunun kaynağını bul; PluginYourGames'in SDK başlatma / `LoadingAPI.ready()` durumunu kontrol et. **Cihaz uyumu (1.20):** Unity 6 WebGL2 gerektirir; Yandex'in listelediği eski sürümler (Android 5+, iOS 9+) karşılanamayabilir → WebGL2 desteği ve en düşük cihaz tabanını belirle, taslakta desteklenen platformları buna göre gerçekçi seç, orta/düşük uç telefonda (mümkünse eski iOS/Android'de de) aç-oyna testi yap; sonucu `docs/YANDEX_CHECKLIST.md`'ye yaz.
+- [ ] **Y3 [S]** Mobil **tek-el kontrol** kararı. Adaylar: (a) tek başparmak: yatay kaydırıcı/direksiyon + otomatik gaz + tek fren/geri butonu, (b) eğim (accelerometer) ile direksiyon + tek gaz/fren butonu, (c) dokun-sürükle ile hedef yönlendirme. Gereksinim 1.10.4 ve 1.6.1.5'in sayfa ayrıntılarını (`requirements/1/10`) oku, prototiple, kararı D2/E5/C6'ya yansıt.
+- [ ] **Y4 [S]** WebGL şablonu: mobilde tam ekran, sayfa kaydırma/pull-to-refresh kapalı (`overscroll-behavior`, `touch-action`), sağ tık/uzun basış menüsü ve metin seçimi kapalı, masaüstü en-boy oranı (uzun kenar ≤ 2× kısa kenar), yeniden boyutlandırma/döndürme testi, WebGL uyarısı yok, sistem video oynatıcısı yok.
+- [ ] **Y5 [S]** İçerik/telif politikası: yalnız kendi üretimimiz / CC0 / önceden üretilmiş YZ içeriği; atıf gerektiren lisanslardan kaçın; gerçek marka/logo yok; siyaset/din/savaş/şiddet yok; krediler oyun içi *metin* olarak; katalogdaki benzer park oyunlarından farklılaşma notu (3.6); oyun adı kuralları (benzersiz; free/top/best/game gibi kelimeler yok).
+
+---
+
+## 1. Varlık (Asset) Stratejisi — Ücretsiz & Abonelik Yok
+
+| İhtiyaç | Yöntem (öncelik sırasıyla) |
+|---|---|
+| **Ses efektleri** | (a) Unity Editor içinde **C# ile prosedürel WAV sentezi** (tık, kazanma, çarpma, fren, motor döngüsü, yıldız). (b) Telifsiz CC0 paketler (Kenney, OpenGameArt-CC0) — Unity Editor'den indirmeyi denerim; olmazsa sen indirip klasöre atarsın. |
+| **Müzik** | (a) Prosedürel/jeneratif döngüler (basit melodi + ritim, C# ile WAV) — menü + oyun içi hafif döngü. (b) CC0 müzik (OpenGameArt, Kenney) — lisansı `CREDITS.md`'ye yazılır. |
+| **3D model** | (a) Unity primitifleri + **ProBuilder** ile low-poly (bina, çit, bariyer, ağaç, koni, lamba, konteyner). (b) CC0 paketler: Kenney, Quaternius (indirme denemesi / senin indirmen). (c) **Blender 5.2** (kurulu ve bağlı, 2026-10-12 doğrulandı) — özgün/organik/karmaşık işlerde Blender Bridge ile (`run_python`, `import_model`, `compare_screenshot`). **Hangisinin kullanılacağı işe göre seçilir (aşağıdaki seçim kuralı); Blender zorunlu değildir.** |
+| **Texture / Materyal** | Prosedürel texture (gürültü, asfalt, çimen, yol çizgisi), tek renk paletli atlas (düşük boyut), CC0: ambientCG / Poly Haven (kullanıcı indirir ya da Editor'den indirmeyi dene). |
+| **Yapay zekâ ses/model üretimi** | Unity MCP'de `generate_audio / generate_image / generate_model` araçları var ama **sağlayıcı API anahtarı** ister (fal.ai, Tripo, Meshy vb.). Ücretsiz kredi/plan sunuyor olabilirler; anahtarı sen alırsan kullanırım. **Bu planın hiçbir adımı buna bağımlı değil.** |
+
+Kural: Üçüncü taraf her dosya için `CREDITS.md` satırı (kaynak, lisans) eklenir.
+
+**Model yöntemi seçim kuralı (Blender zorunlu değil):** Her model/prop işinde o işe en uygun yöntem seçilir; yöntemler karıştırılabilir, seçim ve gerekçesi ilgili adımın notuna yazılır.
+
+| İş türü | Tercih edilen yöntem |
+|---|---|
+| Basit/geometrik şekiller (duvar, kolon, bariyer, çit, kaldırım, rampa, tümsek, zemin, işaretler) | Unity primitifleri / **ProBuilder** — doğrudan Unity'de, hızlı, tek palet, basit collider |
+| Hazır ve stile uyan CC0 karşılığı olanlar (araba, ağaç, konteyner, çöp kutusu, lamba…) | **CC0 paket** (Kenney, Quaternius) — poligon fazlaysa ya da stile uymuyorsa elenir; `CREDITS.md` satırı şart |
+| Organik/karmaşık şekiller, özgün prop'lar, CC0 modeli düzenleme/sadeleştirme, modifier (bevel, array, mirror), rig/animasyon, çok sayıda varyant | **Blender** (`blender_bridge`) — glb ile içe aktarılır, `compare_screenshot` ile kontrol edilir |
+
+Seçim ölçütleri (sırayla): stil uyumu (temiz low-poly, tek palet) → poligon/WebGL bütçesi → toplam süre/emek → lisans. Blender kapalıysa ya da bağlanamıyorsa hiçbir adım bloklanmaz; ProBuilder/CC0 yoluna düşülür.
+
+- [x] **1.1 [S]** Unity'de internetten dosya indirme testi (Editor C# `UnityWebRequest`); sonucu bu dosyaya not et → indirme yolu mu, prosedürel yol mu belirlenir.
+> NOT (2026-10-12): `UnityWebRequest` ile GET testi başarılı (HTTP 200): GitHub raw, kenney.nl, opengameart.org, ambientcg.com, polyhaven.com, quaternius.com. **Karar: indirme yolu açık** → CC0 paketler (Kenney, Quaternius, ambientCG, Poly Haven) Editor'den indirilebilir; gerçek zip indirme + açma da doğrulandı (aşağıdaki not). Prosedürel üretim yine de yedek yol olarak kalır. İndirilen her dosya `CREDITS.md`'ye yazılır.
+> NOT 2 (2026-10-12): **Gerçek zip testi başarılı.** ambientCG `https://ambientcg.com/get?file=Asphalt001_1K-JPG.zip` (~5 MB, doğrudan zip) ve Kenney (`kenney.nl/assets/<paket>` sayfasından regex ile `.zip` linki çıkarılıp indirildi; Prototype Textures, 109 dosya, CC0). Yöntem: `UnityWebRequest` + `DownloadHandlerFile` (Assets dışı geçici klasöre), açma: `System.IO.Compression.ZipFile` — `execute_code` bu derlemeye referans vermediği için **reflection** ile çağrıldı; kalıcı Editor scriptlerinde doğrudan kullanılabilir. Not: `execute_code` güvenlik filtresi klasör silme ve harici program başlatma çağrılarını engeller (silme gerekirse `manage_asset` kullanılır). Test: `Assets/TestSandbox/ZipTestScene.unity` (Plane + Cube, indirilen asfalt texture'lı Standard materyal) başarıyla oluşturuldu/kaydedildi. **`Assets/TestSandbox/` 2026-10-12'de silindi (asfalt texture'ı, test materyali ve `ZipTestScene` dahil). Asfalt kalıcı kullanılacaksa yeniden indirilip `_Project/ThirdParty/` altına konur ve `CREDITS.md`'ye (ambientCG, CC0) satır eklenir.**
+- [x] **1.2 [S]** Blender / ProBuilder / ek paket durumunu kontrol et (kurulu mu?), `manage_tools` ile gerekli grupları aç.
+> NOT (2026-10-12): ~~Blender kurulu değil / bağlı değil~~ **GÜNCELLEME: Blender 5.2 kuruldu ve bağlandı.** İlk denemede köprü erişilemiyordu (BlenderMCP eklentisi kurulu değildi, 127.0.0.1:9876 yanıt vermedi). `addon.py` Blender'a kurulup 'Connect to MCP server' ile bağlanınca `blender_bridge status` erişilebilir döndü (sahne 'Scene', 3 obje). → Blender Bridge yolu açık: modeller ProBuilder + CC0 paketlerin yanında Blender ile de yapılabilir. Dikkat: Blender'da eklenti etkin ve 'Connect to MCP server' basılı olmalı; Blender kapanırsa yeniden bağlanmak gerekir. **ProBuilder 6.1.3 kurulu.** Diğer kurulu paketler: Cinemachine 3.1.7, glTFast 6.14.1, Recorder 5.1.7, uGUI 2.0.0 (TMP dahil), VFX Graph 17.3.0, MCP for Unity 10.3.0. Eksik/yok: URP (Built-in korunuyor), Input System (SimpleInput kullanılıyor). Bu oturumda açılan araç grupları: `probuilder, scripting_ext, ui, vfx, animation, profiling` (`asset_gen` açılmadı: API anahtarı gerektiriyor; `docs, testing` gerekince açılır). Oturum başında gruplar tekrar kapalı olabilir → `manage_tools activate`.
+- [x] **1.3 [S]** `CREDITS.md` ve `Assets/_Project/ThirdParty/` kuralını oluştur.
+> NOT (2026-10-12): `CREDITS.md` proje kökünde (kurallar + varlık tablosu, şimdilik boş), `Assets/_Project/ThirdParty/` klasörü ve içinde kuralı anlatan `README.md` oluşturuldu. İndirilen her CC0 dosyası `ThirdParty/<Kaynak>/` altına konur ve `CREDITS.md` tablosuna satır eklenir.
+
+---
+
+## 2. Faz A — Hazırlık ve Denetim
+
+- [x] **A1 [S]** Yedek: proje klasörünü zip'le / git repo kur (`.gitignore` Unity şablonu). Yeni dal: `rewrite`.
+> NOT (2026-10-12): **Atlandı** — proje yedeği zaten GitHub'da. Zip yedeği ve `rewrite` dalı açılmadı; istenirse sonradan açılır.
+- [x] **A2 [S]** Unity sürümü (6000.3.25f1), render pipeline (Built-in), paket listesi (`manifest.json`) raporu; **aktif platformu WebGL'e çevir** (şu an StandaloneWindows64), WebGL oyuncu ayarlarını (şablon `PROJECT:YandexGames`, Brotli, bellek) raporla.
+> NOT (2026-10-12): **Tamamlandı — aktif platform WebGL'e çevrildi (WebGL Build Support kuruldu, Console temiz).** Unity 6000.3.25f1, Built-in pipeline, Linear renk uzayı. WebGL ayarları: şablon `PROJECT:YandexGames` (`Assets/WebGLTemplates/YandexGames` var), Brotli, decompression fallback kapalı, başlangıç belleği 32 MB / en çok 2048 MB, exception `FullWithoutStacktrace`, data caching açık, managed stripping `Low`, grafik API yalnız `OpenGLES3` (WebGL2). `manifest.json`: Cinemachine 3.1.7, glTFast 6.14.1, ProBuilder 6.1.3, Recorder 5.1.7, uGUI 2.0.0, VFX Graph 17.3.0, MCP for Unity, `feature.development` + çok sayıda `com.unity.modules.*` (K1'de gereksizleri temizle). WebGL modülü sonradan kuruldu ve platform WebGL'e çevrildi; ayarlar (şablon, Brotli, Linear renk uzayı) geçişten sonra değişmedi.
+- [x] **A3 [S]** Console'daki hata/uyarıları temizle, mevcut oyunu bir kez oynanabilir doğrula (baseline).
+> NOT (2026-10-12): **Kısmen tamamlandı — sürüş doğrulaması elle yapılmalı.** Console (Edit + Play modu) temiz: 0 hata, 0 uyarı (tek mesaj MCP aracının kendi 'manage_script.read deprecated' bildirimiydi). `MainMenu` play modunda açıldı, menü UI + araba render oluyor. Build index 3 (`Levels/2`) yüklendi: HUD (süre/yıldız/pause/kamera), araba (Rigidbody, CarControl, 4 WheelCollider) ve koni sırası sorunsuz. **Sürüş otomatik doğrulanamadı:** `vInput` her karede gerçek girişten sıfırlandığı için MCP üzerinden gaz simülasyonu aracı hareket ettirmedi (bu bir oyun hatası olduğunu göstermez; test yöntemi sınırı). Elle kontrol: Play → Level seç → W/yön tuşları ile sür, çarpışma + park + kazanma popup'ını dene; sorun yoksa A3'ü `[x]` yap. Test ekran görüntüleri `Assets/Screenshots/` altında (2 adet, istenirse sil).
+> NOT 2 (2026-10-12): Elle sürüş doğrulaması kullanıcı onayıyla atlanarak A3 kapatıldı. Sürüş sorunları A4 bulgularıyla (özellikle CC-1: durağan araçta W/S) birlikte ilk elle testte kontrol edilecek.
+
+- [x] **A4 [M]** Script denetimi 1/3: `Car/*` (CarControl, WheelControl, CarSoundControl, CarCameraControl) → `docs/AUDIT.md` içine sorun listesi.
+> NOT (2026-10-12): **Tamamlandı — `docs/AUDIT.md` oluşturuldu (Bölüm 1/3: Car/*).** 28 bulgu: 8 yüksek, 14 orta, 6 düşük. En önemlileri: CC-1 (durağan hâlden ters yöne kalkış belirsiz), CC-2 (geri vites hız sınırı yok), CC-3 (ödül reklamı dinleyicisi filtresiz), CC-4 (engel vurgusu materyal sızdırır / kalıcı kırmızı kalabilir), CM-1/2/3 (kamera null + EventBus aboneliği hiç çıkarılmıyor), CS-1 (`YG2.saves` null riski). Statik okuma; kod değiştirilmedi. Car prefab'ındaki Rigidbody/WheelCollider ayarları (interpolation vb.) okunamadı → A7/D1'de bakılacak. Rapor sonundaki 'öncelik sırası' önerisi: çökme riskli CM-1/2/3, CC-3, CS-1 yamaları dikey dilimden önce değerlendirilebilir.
+> NOT 2 (2026-10-12): **A4 bulgularının Adım 1'i çözüldü** (CM-1/2/3, CC-3, CS-1 — `CarCameraControl`, `CarControl`, `CarSoundControl` yamalandı; derleme temiz). Ayrıntı: `docs/AUDIT.md` 'Çözüm Günlüğü'. Kalan: CC-1/2/9/10 → D2, CC-4/7/8 → O3/O10, CS-2..5 → F fazı.
+> NOT 3 (2026-10-12): **A4 bulgularının Adım 2'si çözüldü** (CC-1/2/9/10 — `CarControl`: durağan kalkış ölü bölgesi, geri vites hız sınırı, tek seferlik tork kararı, direksiyon yumuşatma; derleme temiz). Play modunda test edilmedi, elle sürüş kontrolü gerekir (ayrıntı: `docs/AUDIT.md` 'Çözüm Günlüğü'). Kalan: CC-4/7/8 → O3/O10, CS-2..5 → F fazı. D2'de `CarController` yeniden yazılırken bu davranışlar korunmalı.
+> NOT 4 (2026-10-12): **A4 bulgularının Adım 3'ü çözüldü** (CC-4 tam; CC-7 ve CC-8 kısmen — `CarControl`: `MaterialPropertyBlock` ile engel vurgusu, collider'dan yukarı etiket arama, yeni `EventType.ObstacleHit` kalan hak yüküyle; `EventBus.cs` enum sonuna ekleme). Derleme temiz, Play modunda test edilmedi. Kalan: CC-7 yeniden adlandırma (`CarContactObstacle` → `LevelFailed`) → B5/C1, CC-8 `ObstacleBase`/sürtünme kararı → O3, CS-2..5 → F fazı.
+- [ ] **A5 [M]** Script denetimi 2/3: `GameLoopManager, ParkingArea, LevelTimeCounter, StarCounter, EventBus, SceneLoadManager, Initialization, SavesYG, AdManager`.
+- [ ] **A6 [M]** Script denetimi 3/3: `UI/*, Audio/*, LevelSelectionMenu` + `Editor/LevelTools/LevelBuilder.cs`.
+- [ ] **A7 [M]** Sahne denetimi: `MainMenu`, `LevelSelectionMenu`, Level 1/15/30 hiyerarşi + UI yapısı + ışık/kamera ayarı raporu.
+- [ ] **A8 [S]** Performans + boyut baseline'ı: **WebGL build alıp** sıkıştırmasız/Brotli boyutu, yükleme süresi, draw call, bellek ölç (şüpheli kalemler: ses 42.7 MB, `Assets/Plugins` 12.3 MB, 32 sahne 8.4 MB).
+- [ ] **A9 [S]** Mevcut 30 levelin verisi çıkar: engel konumları, park alanı, araba başlangıcı, süre/yıldız eşikleri → `docs/legacy_levels.json` (50 level tasarımında referans).
+
+---
+
+## 3. Faz B — Mimari Temeli
+
+Hedef klasör yapısı:
+
+```
+Assets/_Project/
+  Art/ (Models, Materials, Textures, Shaders, VFX)
+  Audio/ (Music, SFX, Mixer)
+  Data/ (LevelData SO'ları, Config SO'ları)
+  Prefabs/ (Car, Environment, Obstacles, UI, Systems)
+  Scenes/ (Boot, MainMenu, LevelSelect, Gameplay, Levels/)
+  Scripts/ (Core, Gameplay, Car, UI, Audio, Services, Editor)
+```
+
+- [ ] **B1 [S]** Klasör iskeletini oluştur, varlıkları **taşı (Unity içinden, GUID bozulmadan)**.
+- [ ] **B2 [M]** Assembly Definition + namespace düzeni (`ParkingMastery.Core/Gameplay/UI/Services`).
+- [ ] **B3 [M]** `Boot` sahnesi + kalıcı **Systems prefab'ı** (Audio, Save, Ads, Localization, SceneLoader) — bir kez yüklenir.
+- [ ] **B4 [M]** Servis katmanı: `ISaveService` (Yandex SavesYG sarmalayıcı + yerel yedek), `IAdService`, `ILocalizationService`, `IAudioService`.
+- [ ] **B5 [M]** `EventBus` yenile (tipli, bellek sızıntısız abone/çıkma) + **GameState makinesi** (Loading/Playing/Paused/Won/Failed).
+- [ ] **B6 [M]** `LevelData` ScriptableObject (id, dünya/tema, süre, yıldız eşikleri, araba spawn, hedef, engel listesi, müzik, hava/ışık preset).
+- [ ] **B7 [M]** **Tek `Gameplay` sahnesi** + `LevelLoader`: seviye = LevelData + prefab düzeni (30→50 ayrı sahne yerine veri güdümlü). Eski sahneler referans için `Legacy/`'ye alınır.
+
+---
+
+## 4. Faz C — Kodun Yeniden Yazımı
+
+- [ ] **C1 [M]** `GameLoopManager` → yeni `LevelController` (durum makinesi, başla/bitir/yeniden dene).
+- [ ] **C2 [M]** `ParkingArea` → `ParkingZone` (araç hizası/açı/tam içinde olma kontrolü, bekleme süresi, görsel geri bildirim).
+- [ ] **C3 [S]** `LevelTimeCounter` + `StarCounter` → `LevelScoring` (LevelData eşiklerinden yıldız).
+- [ ] **C4 [M]** Kayıt sistemi: ilerleme, yıldızlar, ayarlar, en iyi süre; veri sürümleme ve eski kaydı taşıma (mevcut oyuncuların kaydı kaybolmasın).
+- [ ] **C5 [M]** Reklam akışı (Yandex 4.x kurallarına göre, bkz. 0B.5): interstitial **yalnız oyun dışı eylemden sonra** (Sonraki / Tekrar / Menü) ve ≤ 2 sn gecikmeyle, level içinde reklam yok; kendi bekleme aralığımız; rewarded **ayrı butonla ve ödülü yazan metinle** (ek süre / ipucu / level atlama) — ödül devam etmenin şartı olamaz, yani Tekrar dene ücretsiz kalır; reklam sırasında oyun + ses durur; test modu (draft/prod ortamı).
+- [ ] **C6 [S]** Girdi: klavye (fiziksel tuşlar, klavye düzeninden bağımsız, OS kısayollarıyla çakışmayan) + fare + dokunmatik (SimpleInput) tek `ICarInput` arayüzü arkasında; **mobil tek-el şeması Y3 kararına göre**.
+- [ ] **C7 [S]** Eski kullanılmayan script/prefab/asset temizliği (referans taraması ile).
+- [ ] **C8 [S]** Kod stil geçişi: null-check, `FindObjectOfType` / `Update` içi tahsisleri kaldır, `[SerializeField]` kullanımı, XML özet yorumları.
+
+---
+
+## 5. Faz D — Araba Fiziği, Kontrol, Kamera
+
+- [ ] **D1 [M]** Rigidbody + WheelCollider ayarlarını yeniden kur (ağırlık merkezi, süspansiyon, sürtünme eğrileri) — park manevrasına uygun "kontrollü arcade" his.
+- [ ] **D2 [M]** `CarController` yeniden yazımı: gaz/fren/geri vites, direksiyon yumuşatma, hıza bağlı direksiyon açısı, el freni.
+- [ ] **D3 [S]** Çarpışma: hasar yok ama **çarpışma tepkisi** (ses, kamera sarsıntısı, ceza/uyarı), engellere göre fizik materyalleri.
+- [ ] **D4 [M]** Kamera: takip + hıza göre zoom + park anında sinematik yaklaşma; çarpışmada hafif shake; mobilde uygun FOV.
+- [ ] **D5 [S]** Araba görseli: materyal, far/stop/fren lambası, tekerlek dönüşü, iz (tire marks) ve toz parçacığı.
+- [ ] **D6 [S]** ~~Birden fazla araba~~ — **v1 kapsam dışı** (bkz. 0B.4): tek araba modeli (+ renk seçeneği); çoklu araba sonraki güncellemeye.
+
+---
+
+## 6. Faz E — UI / UX Yeniden Tasarımı
+
+Kararlar: uGUI + TextMeshPro (WebGL için en güvenli), tek **UI tema ScriptableObject'i** (renk, font, buton stili), her ekran ayrı prefab, `Canvas Scaler` referans 1920×1080 + safe area.
+
+- [ ] **E1 [S]** Görsel kimlik: renk paleti, font seçimi (Türkçe/Kiril karakter desteği!), buton/panel sprite'ları (9-slice, prosedürel), ikon seti.
+- [ ] **E2 [M]** UI altyapısı: `UIManager`, `ScreenBase`, ekran geçiş animasyonları (CanvasGroup fade/scale), buton ses/animasyon bileşeni.
+- [ ] **E3 [M]** **Ana Menü** (Oyna, Ayarlar, Dil, Ses, Liderlik tablosu [isteğe bağlı], Krediler) + hafif arka plan (statik görsel veya basit dönen araba; ağır 3D sahne yok). Çıkış butonu yok (web oyununda işlevsiz).
+- [ ] **E4 [M]** **Level Seçim** ekranı: level sayısı `LevelData` listesinden türetilir (v1: 30, v2: 50; 'yakında' kartı yok — 1.15), dünya/sayfa sekmeleri, yıldız gösterimi, kilitli/açık durumu, kaydırma.
+- [ ] **E5 [M]** **Oyun içi HUD**: süre, yıldız hedefi, pause, yeniden başlat, sürüş kontrolleri (mobil: **tek elle kullanılabilir** şema — Y3; masaüstü ipucu); HUD tüm en-boy oranlarında kesilmez / üst üste binmez.
+- [ ] **E6 [M]** **Pause / Kazanma / Kaybetme** popup'ları: yıldız animasyonu, sayaç artışı, sonraki level / tekrar / menü, ödüllü reklam butonu.
+- [ ] **E7 [S]** **Ayarlar** paneli (müzik/SFX ayrı slider, dil, titreşim, grafik kalitesi).
+- [ ] **E8 [S]** Yerelleştirme: **RU (öncelik) / EN / TR**; dil `ysdk.environment.i18n.lang` ile otomatik seçilir (2.14), desteklenmeyen dil → EN; manuel dil değiştirme bayrak/dil adıyla (bilinmeyen dilde de bulunabilsin); merkezi metin tablosu (`TextTranslator` yerine); Kiril + Türkçe karakterli font.
+- [ ] **E9 [S]** Çözünürlük / en-boy oranı testleri (16:9, 4:3, 20:9 dikey/yatay) + safe area.
+- [ ] **E10 [S]** Eğitim (tutorial): ilk 3 levelde kısa, atlanabilir ipuçları.
+
+---
+
+## 7. Faz F — Ses ve Müzik
+
+- [ ] **F1 [S]** `AudioMixer` kur: Master / Music / SFX / UI / Engine grupları; ayar kaydı ile bağla.
+- [ ] **F2 [M]** `AudioService` + `SoundBank` (SO) — havuzlu AudioSource, 3D/2D ayrımı, ses tekrarını engelleme. Eski `SFXManager/LevelSFXManager/MusicManager` kaldırılır.
+- [ ] **F3 [M]** Prosedürel SFX üretici (Editor aracı) → WAV: UI tık/hover, kazanma, kaybetme, yıldız, çarpma (hafif/sert), fren, korna, geri vites bip.
+- [ ] **F4 [M]** Motor sesi: hıza/RPM'e bağlı pitch + volume döngü sistemi (`EngineAudio`).
+- [ ] **F5 [M]** Müzik: menü döngüsü + 3 oyun içi döngü (üretilmiş veya CC0), geçişte crossfade.
+- [ ] **F6 [S]** Ortam sesleri (şehir uğultusu, rüzgâr, liman, kuş) tema başına bir döngü.
+- [ ] **F7 [S]** Ses boyutu optimizasyonu — **toplam ses hedefi ≤ ~8 MB** (şu an `Assets/Audio` ≈ 42.7 MB): Vorbis, mono SFX, kısa SFX Decompress On Load, müzik Compressed In Memory/Streaming, müzik sayısı/süresini kıs.
+
+---
+
+## 8. Faz G — Görsel Stil, Işık, Ortam (Environment)
+
+Stil: **temiz low-poly / stylized** (düşük poligon, tek palet, WebGL'de hızlı). **Ölçek kuralı:** 5 tema ortak materyal paletini ve ortak prefab havuzunu paylaşır; tema farkı renk/ışık/zemin/ses/birkaç özgün prop ile verilir (bkz. 0B.4).
+
+- [ ] **G1 [S]** Render ayarları: **Gamma renk uzayı kararı** (şu an Linear), ışık yönü, mobilde gölgesiz/ucuz gölge, ambient, fog, kalite seviyeleri (Low/Med/High — şu an yalnız Medium var); Built-in pipeline korunur.
+- [ ] **G2 [M]** Materyal paleti + prosedürel texture seti (asfalt, çizgili otopark, çimen, beton, metal, su, kar).
+- [ ] **G3 [M]** Ortam kiti 1 — **Şehir Otoparkı**: kolon, duvar, bariyer, koni, çöp kutusu, lamba, park çizgileri, diğer park etmiş arabalar (prefab). *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **G4 [M]** Ortam kiti 2 — **Liman / Konteyner**: konteyner (mevcut model), vinç silueti, palet, deniz, martı sesi. *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **G5 [M]** Ortam kiti 3 — **Şantiye / Sanayi**: iş makinesi silueti, kum yığını, çit, uyarı bantları. *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **G6 [M]** *(v2)* Ortam kiti 4 — **Kış / Dağ yolu**: kar, çam ağacı, buz zemin (düşük sürtünme), sis. *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **G7 [M]** *(v2)* Ortam kiti 5 — **Gece Şehri / Neon**: gece ışıklandırma, sokak lambası, ışık küreleri, hafif bloom. *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **G8 [S]** Gökyüzü/skybox ve zaman-ışık presetleri (gündüz, gün batımı, gece).
+- [ ] **G9 [S]** Dekoratif objeler için **statik batching / GPU instancing / LOD yok-az** kuralı, draw call bütçesi.
+- [ ] **G10 [S]** Post-process (hafif, kapatılabilir): bloom, vinyet, renk düzeltme — **mobilde varsayılan kapalı**; WebGL'de maliyeti ölçülerek karar verilir.
+
+---
+
+## 8B. Faz G2 — Engel Sistemi (Baştan Tasarım)
+
+Mevcut engeller (Level'lardaki `Obstacles` altındaki düz listeler) tek tek incelenecek; gereksiz, anlamsız veya oyuna katkısı olmayanlar **atılacak**, kalanlar yeniden yapılacak. Hedef: 50 levele yetecek, her biri bir **amaca hizmet eden** engel kataloğu.
+
+Tasarım ilkesi: Her engel en az birine hizmet etmeli → *yolu daraltır / dikkat ister / fizik ve kontrol becerisini sınar / ortam hissini güçlendirir.* Hiçbiri sırf dolgu olmayacak.
+
+Önerilen katalog (denetimden sonra kesinleşir):
+
+| Kategori | Engeller | Davranış |
+|---|---|---|
+| Sabit | Duvar, kolon, bariyer, çit, konteyner, park etmiş araba, kaldırım | Çarpınca ceza/uyarı, hareket etmez |
+| Fizikli (devrilebilir) | Trafik konisi, varil, koli yığını, çöp kutusu | Çarpınca devrilir; devirme = ceza veya yıldız kaybı |
+| Hareketli | Yavaş geçen araç, açılıp kapanan bariyer kolu, kayan kapı | Zamanlama gerektirir (Dünya 3'ten itibaren) |
+| Zemin | Hız tümseği, rampa, buz/kar, çamur, su birikintisi | Sürtünme/hız değiştirir (Dünya 2–4) |
+| Kural/Bölge | Yasak bölge, kontrol noktası, zorunlu geçiş kapısı | Sahaya kural koyar (Dünya 4–5) |
+
+- [ ] **O1 [M]** Mevcut engel denetimi: tüm 30 levelden kullanılan engel tiplerini çıkar (model/boyut/collider/adet), kullanım sıklığını ve işe yararlığını raporla → `docs/OBSTACLE_AUDIT.md` (tut / yeniden yap / at kararı).
+- [ ] **O2 [S]** Engel kataloğunu kesinleştir: her engel için ID, kategori, boyut, ceza kuralı, hangi dünyada tanıtılır → `docs/OBSTACLE_CATALOG.md`.
+- [ ] **O3 [M]** Altyapı: `ObstacleBase` + `ObstacleData` (SO) — çarpışma tepkisi, ceza, ses/efekt, etiket/katman; çarpışma matrisi (Physics Layers) düzeni.
+- [ ] **O4 [M]** Sabit engel prefab'ları (duvar, kolon, bariyer, çit, kaldırım, konteyner) — düşük poligon, tek materyal paleti, basit collider (BoxCollider ağırlıklı). *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **O5 [M]** Park etmiş araba prefab'ları (3–5 renk/model varyantı, **tek mesh, ucuz collider**). *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **O6 [M]** Fizikli engeller (koni, varil, koli, çöp kutusu): Rigidbody ayarları, uyku modu, devrilme algılama, performans için sınırlı sayı. *Model yöntemi: Bölüm 1'deki seçim kuralına göre (ProBuilder / CC0 / Blender — işe en uygun olan; seçim ve gerekçe adım notuna yazılır).*
+- [ ] **O7 [M]** Hareketli engeller: yola göre hareket eden araç, bariyer kolu, kayan kapı — `MovingObstacle` (yol noktaları, hız, bekleme), deterministik zamanlama.
+- [ ] **O8 [M]** Zemin engelleri (**v1: hız tümseği + rampa; buz/çamur/su v2**): hız tümseği, rampa, buz, çamur, su — fizik materyali + WheelCollider sürtünme etkisi + ses/efekt.
+- [ ] **O9 [S]** *(v2)* Kural bölgeleri: yasak bölge, kontrol noktası, zorunlu kapı (trigger tabanlı).
+- [ ] **O10 [S]** Engel geri bildirimi: çarpışmada vurgu rengi/flaş, ses, kısa uyarı ikonu; yıldız kaybı kuralıyla `LevelScoring`'e bağlama.
+- [ ] **O11 [S]** Engel yerleştirme araçları (Editor): grid'e oturtma, çakışma kontrolü, minimum geçiş genişliği uyarısı (arabanın boyuna göre).
+- [ ] **O12 [S]** Engel prefab'ları test sahnesi: hepsi yan yana, her biri için araba çarpma testi ve performans kontrolü.
+- [ ] **O13 [S]** **Engel–Level dağıtım matrisi** (`docs/OBSTACLE_PROGRESSION.md`): 50 levelin her biri için hangi engellerin kullanılacağı, yeni engelin hangi levelde tanıtılacağı, engel sayısı bütçesi (aşağıdaki kurallara göre).
+- [ ] **O14 [S]** Her yeni engel tipi için **tanıtım leveli** tasarımı: engel tek başına, rahat alanda, ilk karşılaşma güvenli (ceza yok veya hafif) → sonraki levellerde diğer engellerle birleşir.
+
+### 8B.1 Engel Tasarım Kuralları (50 level için)
+
+1. **Gereksiz engel yok:** Her engel bir amaca hizmet eder (yolu daraltır / dikkat ister / beceri sınar / ortam hissi verir). Sırf boşluk doldurmak için konan engel silinir. (Referans: mevcut Level 3'te 96 düz engel var; çoğunun bu ölçüte uymadığı O1'de ortaya çıkarılacak.)
+2. **Tek seferde tek yenilik:** Bir levelde en fazla **1 yeni engel tipi** tanıtılır; ilk görüldüğü level kolay olur.
+3. **Kademeli darlık:** Minimum geçiş genişliği arabanın genişliğinin ~2.0 katından (Dünya 1) ~1.25 katına (Dünya 5) kademeli iner. H1 aracı bunu otomatik uyarır.
+4. **Adil olma:** Her engel görsel olarak ne olduğunu belli eder (renk/şekil dili: sabit = gri/beton, devrilebilir = turuncu/parlak, hareketli = sarı-siyah şerit, kural bölgesi = zemin işareti). Hiçbir engel görünmez veya haksız ceza vermez.
+5. **Performans bütçesi (WebGL/mobil):** level başına fizikli (Rigidbody) engel ≤ ~20, hareketli engel ≤ ~6, collider'lar basit (Box/Sphere), tüm engel prefab'ları ortak materyal paletini kullanır; mobilde 30 FPS hedefi bozulmamalı.
+6. **Tekrar yok:** Aynı engel düzeni kopyalanmaz; her level engelleri farklı bir *soruyu* sorar (dar geçit, dönüş, zamanlama, kayma…).
+7. **Geniş kitle:** Yandex kitlesi ağırlıklı casual (35+ yaş çoğunlukta) — engeller sezgisel ve adil olmalı; ceza kuralı ikonla/level başında anlatılır, haksız sürpriz ceza yok.
+
+### 8B.2 Engellerin Dünyalara Dağılımı (taslak — O1/O2 sonrası kesinleşir)
+
+| Dünya | Level | Yeni tanıtılan engeller | Kullanılabilen engeller |
+|---|---|---|---|
+| 1 Şehir Otoparkı | 1–10 | Duvar, kolon, bariyer, kaldırım (1–2) → trafik konisi (3) → park etmiş araba (5) → çöp kutusu (8) | Sabit + hafif fizikli |
+| 2 Liman | 11–20 | Konteyner (11), varil (13), koli/palet yığını (15), dar koridor ve paralel park düzenleri | Dünya 1 + konteyner/varil grupları |
+| 3 Şantiye | 21–30 | Hız tümseği (21), rampa (23), yavaş geçen araç (25), bariyer kolu (27), kayan kapı (29), kum yığını/çit | + hareketli + zemin |
+| 4 Kış Yolu | 31–40 | Buz (31), kar yığını (33), çamur/su birikintisi (35), kontrol noktası (37) | + kaygan zemin; hareketli engellerle birleşim |
+| 5 Gece Şehri | 41–50 | Yasak bölge (41), zorunlu geçiş kapısı (44) | Tüm katalog; karışık, dar alan + zaman + az hata payı |
+
+
+---
+
+## 9. Faz H — 50 Level Tasarımı
+
+Zorluk eğrisi (5 dünya × 10 level):
+
+| Dünya | Level | Tema | Yeni mekanik |
+|---|---|---|---|
+| 1 Şehir Otoparkı | 1–10 | Açık alan → dar geçit | Temel park, koni, duvar |
+| 2 Liman | 11–20 | Konteyner labirenti | Paralel park, dar dönüş |
+| 3 Şantiye | 21–30 | Sert zemin, engel yoğun | Zamanlı, hareketli engel (yavaş) |
+| 4 Kış Yolu | 31–40 | Kaygan zemin | Düşük sürtünme, uzun fren |
+| 5 Gece Şehri | 41–50 | Karışık, usta seviyesi | Dar alan + zaman + az hata payı |
+
+- [ ] **H1 [M]** **Level Editor aracı** (Editor penceresi): LevelData'dan sahne düzeni üretme, engel yerleştirme, "oynanabilirlik" doğrulama (başlangıçtan hedefe ulaşılabilir mi, boşluk ölçüsü).
+- [ ] **H2 [S]** Zorluk/süre/yıldız kuralları (`docs/LEVEL_DESIGN.md`): süre formülü, yıldız eşikleri; **level hedef süresi 30–120 sn (5 dk altı)**, ilk level < 1 dk'da kazanılabilir, zorluk kademeli (Yandex 2.8), casual kitleye uygun adil eşikler; toplam içerik > 10 dk (2.9).
+> **Bağımlılık:** H3–H12 başlamadan O2, O3, O13 tamamlanmış olmalı. Level tasarlarken engel seçimi `docs/OBSTACLE_PROGRESSION.md`'ye uyar.
+
+> **Sürüm dağılımı:** H3–H8 (Level 1–30) **v1**'de, H9–H12 (Level 31–50) **v2**'de yapılır. H13/H14 v1'de yalnız Level 1–30 için, v2'de 50 level için çalıştırılır.
+
+- [ ] **H3 [M]** Level 1–5 tasarla + test.
+- [ ] **H4 [M]** Level 6–10 tasarla + test.
+- [ ] **H5 [M]** Level 11–15
+- [ ] **H6 [M]** Level 16–20
+- [ ] **H7 [M]** Level 21–25
+- [ ] **H8 [M]** Level 26–30
+- [ ] **H9 [M]** Level 31–35
+- [ ] **H10 [M]** Level 36–40
+- [ ] **H11 [M]** Level 41–45
+- [ ] **H12 [M]** Level 46–50
+- [ ] **H13 [S]** Tüm leveller için otomatik doğrulama testi (editor script): spawn, hedef, süre, yıldız, Missing Reference yok.
+- [ ] **H14 [S]** Zorluk eğrisi gözden geçirme (özellikle 1–10 ve 25–30 arası sıçramalar).
+
+---
+
+## 10. Faz I — Oyun Hissi (Juice)
+
+- [ ] **I1 [S]** Park başarı efekti: ışık halkası, konfeti, kamera yavaşlama, yıldız sesi.
+- [ ] **I2 [S]** Çarpışma geri bildirimi: kıvılcım/toz, kamera shake, kısa titreşim (destekliyorsa).
+- [ ] **I3 [S]** Egzoz dumanı, tekerlek tozu/kar spreyi, fren izi.
+- [ ] **I4 [S]** UI mikro animasyonlar (buton basma, sayaç, yıldız doldurma).
+- [ ] **I5 [S]** Sahne geçişleri: fade + yükleme çubuğu.
+
+---
+
+## 11. Faz J — Yandex Games Entegrasyonu
+
+- [ ] **J1 [S]** Yandex'in **güncel** gereksinim sayfalarını yeniden kontrol et (Game requirements, Ad placement, SDK, Changelog; 0B 2026-10-12 tarihli okumaya dayanır) ve `docs/YANDEX_CHECKLIST.md`'yi güncelle.
+- [ ] **J2 [M]** Reklam entegrasyonu (yalnız SDK üzerinden; kendi tam ekran reklam taklidi yok): C5 kurallarının sahaya uygulanması, reklam öncesi/sonrası oyun+ses duraklatma, reklam sonrası ilerleme korunur, gerçek reklamlı test (draft modu / prod ortamı); ek reklam birimi gerekirse yalnız sticky banner.
+- [ ] **J3 [S]** Liderlik tablosu (toplam yıldız veya en iyi süre) — **isteğe bağlı**; giriş yalnız oyuncu bilinçli butona basarsa istenir (Yandex ID), giriş yapmayan oyuncu hiçbir şeyden engellenmez.
+- [ ] **J4 [S]** Bulut kaydı + yerel yedek: ilerleme her eylemden hemen sonra kaydedilir, sayfa yenileme/ekran döndürmede kaybolmaz (1.9); misafir oyuncunun ilerlemesi de saklanır (1.2.2); draftta bulut kayıt seçeneği açılır; offline davranış.
+- [ ] **J5 [S]** SDK yaşam döngüsü: `ysdk.environment.i18n.lang` ile otomatik dil (2.14), oynanabilir olduğu an `LoadingAPI.ready()` (1.19.2), `GameplayAPI.start/stop` (level başı/sonu/pause), `game_api_pause/resume` olayları; PluginYourGames'in bunları doğru yaptığı doğrulanır.
+- [ ] **J6 [S]** Sekme değişimi / odak kaybında sesi kıs + oyunu duraklat (1.3 — sık red nedeni); reklam sırasında da aynı davranış (4.7).
+
+---
+
+## 12. Faz K — Optimizasyon ve Yayın
+
+- [ ] **K1 [M]** WebGL build ayarları: Brotli, kod kırpma (Managed Stripping High), Texture/Audio import optimizasyonu, boş shader/paket temizliği. **Hedef:** toplam dosya ≤ ~40 MB sıkıştırmasız (Yandex sınırı 100 MB), Brotli sonrası indirme ≤ ~15 MB (bizim hedefimiz).
+- [ ] **K2 [S]** Bellek ve GC: Update içi tahsis taraması, nesne havuzu (efekt/ses).
+- [ ] **K3 [S]** Kalite profilleri: Low/Med/High, otomatik cihaz seçimi (mobil → Low/Med).
+- [ ] **K4 [M]** Tam oynanış testi: 50 level; masaüstü + mobil tarayıcı; reklam akışı; kayıt/yükleme.
+- [ ] **K5 [S]** Hata düzeltme turu (bilinen sorunlar listesi → `docs/KNOWN_ISSUES.md`).
+- [ ] **K6 [S]** Mağaza materyalleri: ikon, kapak, ekran görüntüleri (oyundan otomatik alınır), açıklama TR/EN/RU.
+- [ ] **K7 [S]** Son build + Yandex taslağına yükleme kontrol listesi (her yayın sürümü — v1 ve v2 — için tekrarlanır): `index.html` arşiv kökünde, dosya/klasör adlarında boşluk ve Rusça karakter yok (1.22); toplam ≤ 100 MB sıkıştırmasız (1.21); **kodda ve şablonda Yandex S3'e mutlak URL yok (1.7) — arama ile tara**; **oyun hangi URL'de açılırsa açılsın çalışır, URL'ye bağlı kısıtlama yok (1.18) — build'i farklı bir adreste/alt yolda açarak test et**; taslakta bulut kayıt seçeneği (1.11), yönelim, desteklenen platformlar (Y2 sonucuna göre), How to play metni (2.2), yaş derecelendirmesi; `docs/YANDEX_CHECKLIST.md` baştan sona işaretli.
+
+---
+
+## 13. Önerilen Çalışma Sırası
+
+Üç aşamada ilerlenir (bkz. 0B.4 madde 10):
+
+**Aşama 0 — Hazırlık:** `1.1–1.3 → A1–A9 → Y1, Y5`
+
+**Aşama 1 — Dikey dilim (yayınlanmaz, erken risk avı):** `Y2 → Y3 → Y4 → B1–B7 → C1–C2, C6 → D1–D2, D4 → E2, E5 (asgari HUD) → C5 (asgari: 1 interstitial + 1 rewarded) → J5 → J6 → K1`
+Çıktı: WebGL'de açılan, Yandex SDK'sı başlatılmış, `LoadingAPI.ready()` çağıran, veri güdümlü tek level oynanabilen sürüm. Boyut, FPS, mobil tek-el kontrol, eski cihaz (1.20) ve reklam akışı sonuçları `docs/YANDEX_CHECKLIST.md`'ye yazılır. Büyük içerik işine bu sonuçlar bilinmeden girilmez.
+
+**Aşama 2 — v1 (Level 1–30, 3 dünya) → Yandex'e gönderim:** `C3–C4, C5 (tam), C7–C8 → D3, D5 → F1–F2 → E1, E3–E4, E6–E10 → F3–F7 → G1–G5, G8–G10 → O1–O3 → O4–O7, O8 (yalnız hız tümseği + rampa), O10–O12 → O13–O14 (Level 1–30 kısmı) → H1–H2 → H3–H8 → H13–H14 (Level 1–30) → I → J1–J4, J2 (tam) → K2–K7`
+Level seçim ekranı yalnız mevcut leveli gösterir (`LevelData` sayısından türetilir); 'yakında' kartı konmaz (bitmemiş görünüm riski, 1.15).
+
+**Aşama 3 — v2 (Level 31–50) → güncelleme:** `G6–G7 → O8 (buz, çamur, su) → O9 → O13–O14 (Level 31–50 kısmı) → H9–H12 → H13–H14 (50 level) → E4 güncelle → K4–K7 (50 level tam test, mağaza metinleri/ekran görüntüleri güncelle)`
+
+**Not:** Engel sistemi (O1–O14) level tasarımından (H3–H12) **önce** bitmeli; O1 denetimi için A9 (legacy_levels.json) çıktısı gerekir. Engel prefab'ları G fazındaki ortam kitleriyle birlikte düşünülür.
+
+Neden bu sıra: önce altyapı (veri güdümlü level + tek gameplay sahnesi) oturursa, 50 level ve ortam çalışmaları tekrar edilmez; UI ve ses de tek yerden yönetilir.

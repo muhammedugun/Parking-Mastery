@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="stylesheet" href="./style.css">
 
     <!-- Yandex Games SDK -->
@@ -229,6 +229,7 @@
                     // Fill Background [Build Modify]
                 }).catch((message) => {
                     console.error(message);
+                    ShowStartError();
                 });
             };
             
@@ -362,6 +363,56 @@
             }, 0);
 
             // Additional start modules
+        }
+
+
+        // ---- Y4: ekran uyumu, kaydırma ve menü engelleri ----
+        function ApplyAspectCap() {
+            // Mobilde tüm ekran kullanılır; masaüstünde uzun kenar en fazla 2x kısa kenar (Yandex 1.6.2)
+            if (container.className === 'unity-mobile') {
+                container.style.width = '100%';
+                container.style.height = '100%';
+                return;
+            }
+            const w = window.innerWidth, h = window.innerHeight;
+            let cw = w, ch = h;
+            if (w > 2 * h) cw = 2 * h;
+            else if (h > 2 * w) ch = 2 * w;
+            container.style.width = cw + 'px';
+            container.style.height = ch + 'px';
+        }
+        ApplyAspectCap();
+        window.addEventListener('resize', ApplyAspectCap);
+        window.addEventListener('orientationchange', () => setTimeout(ApplyAspectCap, 100));
+        document.addEventListener('fullscreenchange', ApplyAspectCap);
+
+        // Sayfa kaydırma / pull-to-refresh / pinch-zoom / çift dokunma yakınlaştırması kapalı
+        document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(t =>
+            document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+        document.addEventListener('dblclick', e => e.preventDefault());
+
+        // Metin seçimi ve sürükle-bırak kapalı (sağ tık menüsü zaten yukarıda kapalı)
+        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+
+        // Oyun odaktayken boşluk/ok/PageUp-Down tuşları sayfayı kaydırmasın
+        const scrollKeys = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'];
+        window.addEventListener('keydown', e => {
+            const a = document.activeElement;
+            if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable)) return;
+            if (scrollKeys.indexOf(e.code) !== -1) e.preventDefault();
+        }, { passive: false });
+
+        // WebGL2/başlatma hatasında boş ekran yerine kısa mesaj (dil: RU/EN/TR)
+        function ShowStartError() {
+            const lang = (navigator.language || 'en').toLowerCase();
+            const text = lang.startsWith('ru') ? 'Не удалось запустить игру. Обновите браузер.'
+                : lang.startsWith('tr') ? 'Oyun başlatılamadı. Lütfen tarayıcınızı güncelleyin.'
+                : 'The game could not start. Please update your browser.';
+            loadingCover.style.background = '#000';
+            loadingCover.style.display = 'flex';
+            loadingCover.innerHTML = '<div style="color:#fff;font:16px sans-serif;text-align:center;padding:16px">' + text + '</div>';
         }
 
         // Additional script modules

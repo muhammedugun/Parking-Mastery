@@ -1,0 +1,14 @@
+{
+  "name": "ParkingMastery.Editor",
+  "rootNamespace": "ParkingMastery.EditorTools",
+  "references": ["ParkingMastery.Gameplay", "ParkingMastery.Core", "ParkingMastery.Car"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

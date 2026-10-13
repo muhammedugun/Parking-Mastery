@@ -115,3 +115,41 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* ---- Y4: tam ekran, kaydırma ve seçim engelleri ---- */
+html, body {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+    background: #000;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Kapsayıcı ekranda ortalanır; JS masaüstünde en-boy oranını 2:1 ile sınırlar, mobilde tam ekran */
+#unity-container {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+}
+
+#unity-canvas {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+img, video {
+    -webkit-user-drag: none;
+}
